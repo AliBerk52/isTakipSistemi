@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>İş Takip Sistemi - İleri Seviye Rol ve Log Yönetimi</title>
+    <style>
+        /* GENEL TASARIM */
+        body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; display: flex; height: 100vh; background-color: #f4f5f7; color: #172b4d; overflow: hidden; }
+        * { box-sizing: border-box; }
+        button { cursor: pointer; font-family: inherit; transition: 0.2s; }
+        
+        /* SOL MENÜ VE KİMLİK SİMÜLATÖRÜ */
+        .sidebar { width: 260px; background: #091e42; color: white; display: flex; flex-direction: column; padding: 20px 0; z-index: 10; }
+        .brand { font-size: 1.2rem; font-weight: bold; padding: 0 20px 15px 20px; color: #4c9aff; }
+        
+        .role-switcher { padding: 0 20px 20px 20px; border-bottom: 1px solid rgba(255,255,255,0.1); margin-bottom: 10px; background: #0b2654; }
+        .role-switcher label { display: block; font-size: 0.75rem; color: #8993a4; text-transform: uppercase; margin-bottom: 5px; font-weight: bold; }
+        .role-switcher select { width: 100%; padding: 8px; background: #172b4d; color: white; border: 1px solid #36b37e; border-radius: 4px; font-weight: bold; cursor: pointer; outline: none; }
+        
+        .menu-item { padding: 15px 20px; color: #b3bac5; display: flex; align-items: center; gap: 10px; transition: 0.2s; border-left: 3px solid transparent; cursor: pointer; display: none; }
+        .menu-item:hover, .menu-item.active { background: rgba(255,255,255,0.05); color: white; border-left-color: #4c9aff; }
+
+        /* ANA İÇERİK */
+        .main-wrapper { flex: 1; display: flex; flex-direction: column; overflow: hidden; position: relative; }
+        .page { display: none; flex-direction: column; height: 100%; overflow-y: auto; padding: 20px 30px; animation: fadeIn 0.2s ease; }
+        .page.active { display: flex; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; padding-bottom: 15px; border-bottom: 1px solid #dfe1e6; }
+        .header h1 { margin: 0; font-size: 1.5rem; color: #172b4d; }
+        .header-actions { display: flex; gap: 10px; }
+        
+        .btn-primary { background: #0052cc; color: white; border: none; padding: 10px 16px; border-radius: 4px; font-weight: 600; }
+        .btn-primary:hover { background: #0047b3; }
+        .btn-secondary { background: #ebecf0; color: #172b4d; border: none; padding: 10px 16px; border-radius: 4px; font-weight: 600; }
+        .btn-secondary:hover { background: #dfe1e6; }
+
+        /* KARTLAR (YÖNETİCİ EKRANI İÇİN) */
+        .projects-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
+        .card { background: white; padding: 20px; border-radius: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); border-top: 4px solid #0052cc; }
+        .card h3 { margin: 0 0 10px 0; color: #0052cc; }
+
+        /* KANBAN BOARD (PROJE ADMİNİ EKRANI İÇİN) */
+        .board-layout { display: flex; gap: 20px; height: 100%; min-height: 400px; margin-top: 15px; }
+        .kanban-area { flex: 1; display: flex; gap: 15px; overflow-x: auto; padding-bottom: 10px; }
+        .col { background: #f4f5f7; border-radius: 6px; min-width: 250px; padding: 10px; display: flex; flex-direction: column; gap: 10px; }
+        .col-header { font-weight: 600; font-size: 0.85rem; color: #5e6c84; text-transform: uppercase; padding: 5px; border-bottom: 2px solid #dfe1e6; margin-bottom: 5px; }
+        .task { background: white; padding: 12px; border-radius: 4px; box-shadow: 0 1px 2px rgba(0,0,0,0.1); font-size: 0.9rem; border-left: 3px solid #dfe1e6; }
+        .task-title { font-weight: 600; margin-bottom: 8px; }
+
+        /* BENİM İŞLERİM (ÇALIŞAN EKRANI İÇİN) */
+        .my-tasks-container { display: flex; flex-direction: column; gap: 15px; max-width: 800px; }
+        .my-task-card { background: white; padding: 20px; border-radius: 6px; border-left: 4px solid #4c9aff; box-shadow: 0 1px 3px rgba(0,0,0,0.1); display: flex; justify-content: space-between; align-items: center;}
+        
+        /* MESAJ/LOG KUTUSU (PROJE ADMİNİ EKRANI İÇİN) */
+        .inbox-container { display: flex; flex-direction: column; gap: 15px; max-width: 800px; }
+        .log-card { background: white; padding: 15px 20px; border-radius: 6px; border-left: 4px solid #ffab00; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+        .log-header { font-size: 0.85rem; color: #5e6c84; margin-bottom: 10px; display: flex; justify-content: space-between; }
+        .log-message { background: #f4f5f7; padding: 10px; border-radius: 4px; font-style: italic; color: #172b4d; border-left: 2px solid #dfe1e6;}
+
+        /* MODALLAR */
+        .modal-overlay { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(9, 30, 66, 0.54); z-index: 100; justify-content: center; align-items: center; }
+        .modal { background: white; padding: 25px; border-radius: 6px; width: 100%; max-width: 450px; box-shadow: 0 8px 16px rgba(0,0,0,0.1); }
+        .modal h2 { margin: 0 0 15px 0; font-size: 1.2rem; }
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 5px; color: #5e6c84; }
+        .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 10px; border: 2px solid #dfe1e6; border-radius: 4px; font-family: inherit; }
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color: #4c9aff; outline: none; }
+        .modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; }
+        .btn-text { background: none; border: none; color: #5e6c84; font-weight: 600; padding: 10px; }
+        .btn-text:hover { background: #ebecf0; border-radius: 4px; }
+    </style>
+</head>
+<body>
+
+    <div class="sidebar">
+        <div class="brand">🚀 İş Takip Pro</div>
+        
+        <div class="role-switcher">
+            <label>Sisteme Giriş Yapan Kişi</label>
+            <select id="userSimulator" onchange="switchUser()">
+                <option value="Admin">👑 Sistem Yöneticisi</option>
+                <option value="Ahmet Yılmaz" selected>👨‍💻 Ahmet Yılmaz (P. Admini)</option>
+                <option value="Ali Berk">👨‍💻 Ali Berk (Çalışan)</option>
+                <option value="Ayşe Kaya">👩‍💻 Ayşe Kaya (Çalışan)</option>
+                <option value="Mehmet Yıldız">👨‍💻 Mehmet Yıldız (Çalışan)</option>
+            </select>
+        </div>
+
+        <div class="menu-item" id="menu-manager-projects" onclick="navTo('page-manager', this)">📂 Tüm Projeler</div>
+        
+        <div class="menu-item" id="menu-admin-board" onclick="navTo('page-admin-board', this)">📋 Proje Yönetimi (Pano)</div>
+        <div class="menu-item" id="menu-admin-inbox" onclick="navTo('page-admin-inbox', this)">📥 Gelen Loglar / Mesajlar</div>
+        
+        <div class="menu-item" id="menu-employee-tasks" onclick="navTo('page-employee-tasks', this)">💼 Benim İşlerim</div>
+    </div>
+
+    <div class="main-wrapper">
+
+        <div id="page-manager" class="page">
+            <div class="header">
+                <h1>Şirket Projeleri</h1>
+                <button class="btn-primary" onclick="openModal('newProjectModal')">+ Yeni Proje Aç & Admin Ata</button>
+            </div>
+            <div class="projects-grid" id="managerProjectsList">
+                </div>
+        </div>
+
+        <div id="page-admin-board" class="page">
+            <div class="header" style="flex-direction: column; align-items: flex-start; gap: 15px;">
+                <div style="display: flex; justify-content: space-between; width: 100%;">
+                    <div>
+                        <h1 id="adminProjectTitle">Proje Adı</h1>
+                        <span style="font-size: 0.85rem; color: #5e6c84;" id="adminProjectTeamText">Proje Takımı: </span>
+                    </div>
+                    <div class="header-actions">
+                        <button class="btn-secondary" onclick="openModal('teamModal')">👥 Çalışan Ekle</button>
+                        <button class="btn-primary" style="background: #36b37e;" onclick="openTaskModal()">+ Yeni İş Ata</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="board-layout">
+                <div class="kanban-area">
+                    <div class="col" id="col-todo"><div class="col-header">Yapılacaklar</div><div id="list-todo"></div></div>
+                    <div class="col" id="col-progress"><div class="col-header">Devam Ediyor</div><div id="list-progress"></div></div>
+                    <div class="col" id="col-blocked"><div class="col-header" style="color: #ff5630;">Sorun Var</div><div id="list-blocked"></div></div>
+                    <div class="col" id="col-done"><div class="col-header">Tamamlandı</div><div id="list-done"></div></div>
+                </div>
+            </div>
+        </div>
+
+        <div id="page-admin-inbox" class="page">
+            <div class="header">
+                <h1>Çalışanlardan Gelen Güncellemeler</h1>
+            </div>
+            <div class="inbox-container" id="adminInboxList">
+                </div>
+        </div>
+
+        <div id="page-employee-tasks" class="page">
+            <div class="header">
+                <div>
+                    <h1 id="employeeTitle">Benim İşlerim</h1>
+                    <span style="font-size: 0.85rem; color: #5e6c84;">Sadece sana atanan görevleri ve durumlarını görüyorsun.</span>
+                </div>
+            </div>
+            <div class="my-tasks-container" id="employeeTasksList">
+                </div>
+        </div>
+
+    </div>
+
+    <div class="modal-overlay" id="newProjectModal">
+        <div class="modal">
+            <h2>Yeni Proje Oluştur</h2>
+            <div class="form-group">
+                <label>Proje Adı</label>
+                <input type="text" id="newProjName" placeholder="Örn: E-Ticaret Altyapısı">
+            </div>
+            <div class="form-group">
+                <label>Proje Lideri (Admini) Seç</label>
+                <select id="newProjAdmin">
+                    </select>
+                <span style="font-size: 0.75rem; color: #5e6c84;">*Seçilen kişi bu proje için tam yetkili olacaktır.</span>
+            </div>
+            <div class="modal-actions">
+                <button class="btn-text" onclick="closeModal('newProjectModal')">İptal</button>
+                <button class="btn-primary" onclick="createProject()">Oluştur</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="teamModal">
+        <div class="modal">
+            <h2>Projeye Çalışan Dahil Et</h2>
+            <div class="form-group">
+                <label>Sistemdeki Çalışanlar</label>
+                <select id="newTeamMember"></select>
+            </div>
+            <div class="modal-actions">
+                <button class="btn-text" onclick="closeModal('teamModal')">İptal</button>
+                <button class="btn-primary" onclick="addTeamMember()">Takıma Ekle</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="taskModal">
+        <div class="modal">
+            <h2>Çalışana İş Ata</h2>
+            <div class="form-group">
+                <label>Görev Başlığı</label>
+                <input type="text" id="newTaskTitle" placeholder="Örn: Veritabanı Optimizasyonu">
+            </div>
+            <div class="form-group">
+                <label>Kime Atanacak? (Sadece Kendi Takımın)</label>
+                <select id="taskAssignee"></select>
+            </div>
+            <div class="modal-actions">
+                <button class="btn-text" onclick="closeModal('taskModal')">İptal</button>
+                <button class="btn-primary" onclick="createTask()">İşi Ata</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="statusModal">
+        <div class="modal">
+            <h2>Durum ve Log Bildirimi</h2>
+            <p style="font-size: 0.85rem; color: #5e6c84; margin-bottom: 15px;">Bu görevin durumunu değiştiriyorsun. Lütfen Proje Adminine gitmesi için log (mesaj) bırak.</p>
+            
+            <div class="form-group">
+                <label>Yeni Durum</label>
+                <select id="statusSelect">
+                    <option value="progress">▶️ Devam Ediyor</option>
+                    <option value="blocked">⚠️ Sorun Var</option>
+                    <option value="done">✅ Tamamlandı</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Mesaj / Açıklama (Zorunlu)</label>
+                <textarea id="statusMessage" rows="3" placeholder="Örn: Tablolar eklendi, test aşamasına geçiyorum..." required></textarea>
+            </div>
+
+            <div class="modal-actions">
+                <button class="btn-text" onclick="closeModal('statusModal')">Vazgeç</button>
+                <button class="btn-primary" onclick="confirmStatusChange()">Güncelle ve Mesaj At</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- 1. SİSTEM VERİTABANI SİMÜLASYONU ---
+        // Herkes temelde normal bir kişidir. Sadece proje bazlı adminlik yaparlar.
+        let users = ['Admin', 'Ahmet Yılmaz', 'Ali Berk', 'Ayşe Kaya', 'Mehmet Yıldız'];
+        
+        let projects = [
+            {
+                id: 1,
+                name: 'Django CMS Altyapısı',
+                admin: 'Ahmet Yılmaz', // Ahmet bu projenin admini
+                team: ['Ali Berk'], // Ahmet, Ali'yi takımına almış
+                tasks: [
+                    { id: 101, title: 'Modellerin Oluşturulması', assignee: 'Ali Berk', status: 'todo' }
+                ],
+                logs: [] // Çalışanların attığı mesajlar buraya düşecek
+            }
+        ];
+
+        let activeUser = 'Ahmet Yılmaz'; 
+        let currentStatusTaskId = null; // İşlem yapılan görev
+        let currentStatusProjectId = null;
+
+        // --- 2. GİRİŞ YAPILAN KİŞİYE GÖRE EKRANI ÇİZ ---
+        function switchUser() {
+            activeUser = document.getElementById('userSimulator').value;
+            
+            // Tüm menüleri gizle
+            document.querySelectorAll('.menu-item').forEach(item => item.style.display = 'none');
+            
+            // YÖNETİCİ MANTIĞI
+            if(activeUser === 'Admin') {
+                document.getElementById('menu-manager-projects').style.display = 'flex';
+                navTo('page-manager', document.getElementById('menu-manager-projects'));
+                renderManagerPage();
+            } 
+            // ÇALIŞAN / PROJE ADMİNİ MANTIĞI
+            else {
+                // Kullanıcı herhangi bir projenin admini mi?
+                let managedProjects = projects.filter(p => p.admin === activeUser);
+                
+                // Eğer admin olduğu bir proje varsa, Yönetim Panolarını aç
+                if(managedProjects.length > 0) {
+                    document.getElementById('menu-admin-board').style.display = 'flex';
+                    document.getElementById('menu-admin-inbox').style.display = 'flex';
+                    navTo('page-admin-board', document.getElementById('menu-admin-board'));
+                    renderAdminBoard(managedProjects[0]); // Demo için ilk yönettiği projeyi açar
+                    renderAdminInbox(managedProjects[0]);
+                } 
+                // Admin değilse veya admin olduğu projenin yanında "Benim İşlerim"i de görmek istiyorsa
+                else {
+                    document.getElementById('menu-employee-tasks').style.display = 'flex';
+                    navTo('page-employee-tasks', document.getElementById('menu-employee-tasks'));
+                    renderEmployeeTasks();
+                }
+
+                // Her çalışan kendi işlerini her zaman görebilir
+                if(managedProjects.length > 0) {
+                    document.getElementById('menu-employee-tasks').style.display = 'flex';
+                } else {
+                    renderEmployeeTasks();
+                }
+            }
+        }
+
+        function navTo(pageId, menuItem) {
+            document.querySelectorAll('.menu-item').forEach(item => item.classList.remove('active'));
+            menuItem.classList.add('active');
+            document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
+            document.getElementById(pageId).classList.add('active');
+        }
+
+        // --- 3. YÖNETİCİ EKRANI (PROJE OLUŞTURMA VE ADMİN SEÇME) ---
+        function renderManagerPage() {
+            let container = document.getElementById('managerProjectsList');
+            container.innerHTML = '';
+            projects.forEach(p => {
+                container.insertAdjacentHTML('beforeend', `
+                    <div class="card">
+                        <h3>${p.name}</h3>
+                        <div style="font-size: 0.85rem; color: #5e6c84;">👑 Proje Admini: <strong style="color:#172b4d;">${p.admin}</strong></div>
+                    </div>
+                `);
+            });
+
+            // Yeni proje modalı için sadece çalışanları doldur
+            let select = document.getElementById('newProjAdmin');
+            select.innerHTML = '';
+            users.filter(u => u !== 'Admin').forEach(u => {
+                select.insertAdjacentHTML('beforeend', `<option value="${u}">${u}</option>`);
+            });
+        }
+
+        function createProject() {
+            let name = document.getElementById('newProjName').value;
+            let admin = document.getElementById('newProjAdmin').value;
+            if(!name) return;
+
+            projects.push({ id: Date.now(), name: name, admin: admin, team: [], tasks: [], logs: [] });
+            closeModal('newProjectModal');
+            document.getElementById('newProjName').value = '';
+            renderManagerPage();
+            alert("Proje açıldı ve " + admin + " yetkilendirildi!");
+        }
+
+        // --- 4. PROJE ADMİNİ EKRANI (TAKIM VE PANO) ---
+        function renderAdminBoard(project) {
+            if(!project) return;
+            document.getElementById('adminProjectTitle').innerText = project.name;
+            document.getElementById('adminProjectTeamText').innerText = "Proje Takımı: " + (project.team.length > 0 ? project.team.join(", ") : "Henüz kimse yok");
+
+            // Panoyu temizle
+            ['todo', 'progress', 'blocked', 'done'].forEach(s => document.getElementById(`list-${s}`).innerHTML = '');
+
+            // İşleri çiz
+            project.tasks.forEach(task => {
+                let color = task.status === 'done' ? '#8993a4' : (task.status === 'blocked' ? '#ff5630' : (task.status === 'progress' ? '#36b37e' : '#0052cc'));
+                let taskHtml = `
+                <div class="task" style="border-left-color: ${color}; ${task.status === 'done' ? 'opacity:0.6;' : ''}">
+                    <div class="task-title">${task.title}</div>
+                    <div style="font-size: 0.8rem; color: #5e6c84;">👤 Çalışan: <strong>${task.assignee}</strong></div>
+                </div>`;
+                document.getElementById(`list-${task.status}`).insertAdjacentHTML('beforeend', taskHtml);
+            });
+
+            // Takım Ekleme Modalı için listeyi doldur (Admin haricindekiler ve takımda olmayanlar)
+            let teamSelect = document.getElementById('newTeamMember');
+            teamSelect.innerHTML = '';
+            users.filter(u => u !== 'Admin' && u !== activeUser && !project.team.includes(u)).forEach(u => {
+                teamSelect.insertAdjacentHTML('beforeend', `<option value="${u}">${u}</option>`);
+            });
+
+            // İş Atama Modalı için takımdakileri doldur
+            let taskSelect = document.getElementById('taskAssignee');
+            taskSelect.innerHTML = '';
+            project.team.forEach(u => {
+                taskSelect.insertAdjacentHTML('beforeend', `<option value="${u}">${u}</option>`);
+            });
+        }
+
+        function addTeamMember() {
+            let newMember = document.getElementById('newTeamMember').value;
+            let project = projects.find(p => p.admin === activeUser);
+            if(project && newMember) {
+                project.team.push(newMember);
+                closeModal('teamModal');
+                renderAdminBoard(project);
+            }
+        }
+
+        function createTask() {
+            let title = document.getElementById('newTaskTitle').value;
+            let assignee = document.getElementById('taskAssignee').value;
+            let project = projects.find(p => p.admin === activeUser);
+            
+            if(project && title && assignee) {
+                project.tasks.push({ id: Date.now(), title: title, assignee: assignee, status: 'todo' });
+                closeModal('taskModal');
+                document.getElementById('newTaskTitle').value = '';
+                renderAdminBoard(project);
+            } else {
+                alert("Lütfen önce takıma çalışan ekleyin ve görevi doldurun.");
+            }
+        }
+
+        // --- 5. ÇALIŞAN EKRANI (İZOLE GÖREVLER VE MESAJ ATMA) ---
+        function renderEmployeeTasks() {
+            document.getElementById('employeeTitle').innerText = activeUser + " - Benim İşlerim";
+            let container = document.getElementById('employeeTasksList');
+            container.innerHTML = '';
+
+            let hasTasks = false;
+
+            // Tüm projelerde bu çalışana atanan işleri bul
+            projects.forEach(project => {
+                let myTasks = project.tasks.filter(t => t.assignee === activeUser);
+                
+                myTasks.forEach(task => {
+                    hasTasks = true;
+                    let statusHtml = '';
+                    if(task.status === 'todo') statusHtml = '<span style="color:#0052cc;">YAPILACAK</span>';
+                    else if(task.status === 'progress') statusHtml = '<span style="color:#36b37e;">DEVAM EDİYOR</span>';
+                    else if(task.status === 'blocked') statusHtml = '<span style="color:#ff5630;">SORUN VAR</span>';
+                    else statusHtml = '<span style="color:#8993a4;">TAMAMLANDI</span>';
+
+                    let card = `
+                    <div class="my-task-card">
+                        <div>
+                            <div style="font-size:0.75rem; color:#5e6c84; text-transform:uppercase;">📂 Proje: ${project.name}</div>
+                            <div style="font-size:1.1rem; font-weight:bold; margin-top:5px; margin-bottom:5px;">${task.title}</div>
+                            <div style="font-size:0.85rem; color:#172b4d;">Mevcut Durum: <strong>${statusHtml}</strong></div>
+                        </div>
+                        <div>
+                            <button class="btn-primary" onclick="openStatusModal(${project.id}, ${task.id})">Durumu Güncelle & Mesaj At</button>
+                        </div>
+                    </div>`;
+                    container.insertAdjacentHTML('beforeend', card);
+                });
+            });
+
+            if(!hasTasks) container.innerHTML = '<p style="color:#5e6c84;">Harika! Şu an bekleyen bir işin yok.</p>';
+        }
+
+        function openStatusModal(projectId, taskId) {
+            currentStatusProjectId = projectId;
+            currentStatusTaskId = taskId;
+            openModal('statusModal');
+        }
+
+        function confirmStatusChange() {
+            let newStatus = document.getElementById('statusSelect').value;
+            let message = document.getElementById('statusMessage').value;
+            
+            if(message.trim() === '') return alert("Lütfen proje adminine iletilecek bir mesaj girin!");
+
+            let project = projects.find(p => p.id === currentStatusProjectId);
+            let task = project.tasks.find(t => t.id === currentStatusTaskId);
+
+            // Durumu güncelle
+            task.status = newStatus;
+
+            // P.Admine Log / Mesaj gönder
+            let statusText = newStatus === 'done' ? 'Tamamlandı' : (newStatus === 'blocked' ? 'Sorun Var' : 'Devam Ediyor');
+            project.logs.push({
+                user: activeUser,
+                taskTitle: task.title,
+                newStatus: statusText,
+                message: message,
+                time: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})
+            });
+
+            closeModal('statusModal');
+            document.getElementById('statusMessage').value = '';
+            
+            alert("Durum güncellendi ve mesaj Proje Adminine iletildi.");
+            renderEmployeeTasks(); // Kendi ekranını yenile
+        }
+
+        // --- 6. PROJE ADMİNİ İNBOX (GELEN LOGLAR) EKRANI ---
+        function renderAdminInbox(project) {
+            if(!project) return;
+            let container = document.getElementById('adminInboxList');
+            container.innerHTML = '';
+
+            if(project.logs.length === 0) {
+                container.innerHTML = '<p style="color:#5e6c84;">Çalışanlardan henüz bir mesaj gelmedi.</p>';
+                return;
+            }
+
+            // Sondan başa (en yeni en üstte) sıralayarak çiz
+            [...project.logs].reverse().forEach(log => {
+                let badgeColor = log.newStatus === 'Tamamlandı' ? '#36b37e' : (log.newStatus === 'Sorun Var' ? '#ff5630' : '#0052cc');
+                let card = `
+                <div class="log-card">
+                    <div class="log-header">
+                        <span><strong>${log.user}</strong>, <em>"${log.taskTitle}"</em> görevini güncelledi.</span>
+                        <span>⏱️ ${log.time}</span>
+                    </div>
+                    <div style="margin-bottom: 10px; font-size: 0.85rem;">
+                        Yeni Durum: <strong style="color: ${badgeColor};">${log.newStatus}</strong>
+                    </div>
+                    <div class="log-message">"${log.message}"</div>
+                </div>`;
+                container.insertAdjacentHTML('beforeend', card);
+            });
+        }
+
+        // Modalları Aç/Kapat
+        function openModal(modalId) { document.getElementById(modalId).style.display = 'flex'; }
+        function closeModal(modalId) { document.getElementById(modalId).style.display = 'none'; }
+
+        // İlk açılışta sistemi başlat
+        window.onload = switchUser;
+    </script>
+</body>
+</html>
