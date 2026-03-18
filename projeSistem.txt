@@ -1,0 +1,36 @@
+aktörler:
+yönetici (sistem admini)
+proje admini (grup lideri)
+çalışan
+müşteri
+
+ilişkiler:
+y->p->ç
+müşteri işi takip edebilecek ve proje adminine yorum yapabilicek
+ç>p>y
+
+senaryolar:
+yönetici proje adminine işi atıyacak
+yönetici iş dağılıma yapabilecek
+yönetici proje oluşturabilecek
+yönetici başlangıç ve deadline verecek
+(projeyi sadece atayananlar ve yönetici görebilicek)
+
+proje admini takımı oluşturacak
+
+bir projeyi yönetici, projenin admini, projede çalışanlar ve projenin müşterisi yorum yapabilir
+
+yönetici hariç yönetici tüm rolleri değişebilir
+proje admini çalışanların rolünü değiştirebilir
+bunun dışında kimse rol değişemez
+çalışanlar tamamlandı, devam ediyor, sorun var, sorun çözüldü (ve bu 4 durumdan birini proje admnine belirttiğinde durum mesajı atmak zorunda olacaklar)
+
+proje admini tamamlandı, devam ediyor, sorun var, sorun çözüldü (yöneticiye)
+
+üyelik (junior, medior, senior)
+
+
+
+
+
+
