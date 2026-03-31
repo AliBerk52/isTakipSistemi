@@ -37,6 +37,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'management_app',
 ]
 
 MIDDLEWARE = [
@@ -74,8 +75,12 @@ WSGI_APPLICATION = 'ana_proje.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'is_takip_db',          # MySQL Workbench'te oluşturduğun şema adı
+        'USER': 'root',                 # Genelde varsayılan kullanıcı 'root'tur
+        'PASSWORD': 'alper0707',  # MySQL kurulumunda şifre belirlediysen buraya yaz (yoksa boş bırak '')
+        'HOST': '127.0.0.1',            # Kendi bilgisayarın olduğu için localhost
+        'PORT': '3306',                 # MySQL'in standart portu
     }
 }
 
@@ -120,3 +125,13 @@ STATIC_URL = 'static/'
 SESSION_COOKIE_AGE = 1800  #oturumun zaman aşımı 30 dakika
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True #tarayıcı kapanırsa çıkış
 SESSION_COOKIE_SECURE = True #sadece https üzerinden cookie gönderr
+
+
+
+
+
+
+
+
+
+AUTH_USER_MODEL = 'management_app.User'
