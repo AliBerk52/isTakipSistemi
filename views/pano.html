@@ -1,0 +1,66 @@
+<div class="header">
+    <div>
+        <h1 id="adminProjectTitle">Proje Adı Yükleniyor...</h1>
+        <span style="font-size: 0.9rem; color: var(--text-light); font-weight: 600;" id="adminProjectTeamText">Proje Takımı: </span>
+    </div>
+    <div class="header-actions">
+        <button class="btn-secondary" onclick="openModal('teamModal')">👥 Çalışan Ekle</button>
+        <button class="btn-primary" style="background: var(--color-success);" onclick="openModal('taskModal')">➕ Yeni İş Ata</button>
+    </div>
+</div>
+
+<div class="board-layout">
+    <div class="kanban-area">
+        <div class="col" data-status="todo">
+            <div class="col-header">Yapılacaklar <span class="task-count" id="count-todo">0</span></div>
+            <div class="task-list" id="list-todo" style="min-height: 200px;"></div>
+        </div>
+        
+        <div class="col" data-status="progress">
+            <div class="col-header">Devam Ediyor <span class="task-count" id="count-progress">0</span></div>
+            <div class="task-list" id="list-progress" style="min-height: 200px;"></div>
+        </div>
+        
+        <div class="col" data-status="blocked">
+            <div class="col-header" style="color: var(--color-danger);">Sorun Var <span class="task-count" id="count-blocked">0</span></div>
+            <div class="task-list" id="list-blocked" style="min-height: 200px;"></div>
+        </div>
+        
+        <div class="col" data-status="done">
+            <div class="col-header">Tamamlandı <span class="task-count" id="count-done">0</span></div>
+            <div class="task-list" id="list-done" style="min-height: 200px;"></div>
+        </div>
+    </div>
+</div>
+
+<div class="modal-overlay" id="teamModal">
+    <div class="modal">
+        <h2>Projeye Çalışan Dahil Et</h2>
+        <div class="form-group">
+            <label>Sistemdeki Çalışanlar</label>
+            <select id="newTeamMember"></select>
+        </div>
+        <div class="modal-actions">
+            <button class="btn-secondary" onclick="closeModal('teamModal')">İptal</button>
+            <button class="btn-primary" onclick="handleAddTeamMember()">Takıma Ekle</button>
+        </div>
+    </div>
+</div>
+
+<div class="modal-overlay" id="taskModal">
+    <div class="modal">
+        <h2>Çalışana İş Ata</h2>
+        <div class="form-group">
+            <label>Görev Başlığı</label>
+            <input type="text" id="newTaskTitle" placeholder="Örn: Modellerin Hazırlanması">
+        </div>
+        <div class="form-group">
+            <label>Kime Atanacak?</label>
+            <select id="taskAssignee"></select>
+        </div>
+        <div class="modal-actions">
+            <button class="btn-secondary" onclick="closeModal('taskModal')">İptal</button>
+            <button class="btn-primary" onclick="handleCreateTask()">İşi Ata</button>
+        </div>
+    </div>
+</div>

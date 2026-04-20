@@ -1,0 +1,31 @@
+<div class="header">
+    <div>
+        <h1 id="employeeTitle">Benim İşlerim</h1>
+        <span style="font-size: 0.9rem; color: var(--text-light);">Atandığınız aktif görevler.</span>
+    </div>
+</div>
+
+<div class="my-tasks-container" id="employeeTasksList">
+    </div>
+
+<div class="modal-overlay" id="statusModal">
+    <div class="modal">
+        <h2>Durum Güncelle & Mesaj Bırak</h2>
+        <div class="form-group">
+            <label>Yeni Durum</label>
+            <select id="statusSelect">
+                <option value="progress">▶️ Devam Ediyor</option>
+                <option value="blocked">⚠️ Sorun Var</option>
+                <option value="done">✅ Tamamlandı</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label>Mesaj / Açıklama (Zorunlu)</label>
+            <textarea id="statusMessage" rows="3" placeholder="Yaptığınız değişikliği proje adminine açıklayın..." required></textarea>
+        </div>
+        <div class="modal-actions">
+            <button class="btn-secondary" onclick="closeModal('statusModal')">Vazgeç</button>
+            <button class="btn-primary" onclick="handleStatusChange()">Gönder</button>
+        </div>
+    </div>
+</div>
