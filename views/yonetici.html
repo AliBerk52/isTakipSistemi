@@ -1,0 +1,29 @@
+<div class="header">
+    <div>
+        <h1>Sistem Projeleri</h1>
+        <span style="color: var(--text-light);">Tüm aktif projeler ve yöneticileri.</span>
+    </div>
+    <button class="btn-primary" onclick="openModal('newProjectModal')">➕ Yeni Proje Oluştur</button>
+</div>
+
+<div class="projects-grid" id="managerProjectsList">
+    </div>
+
+<div class="modal-overlay" id="newProjectModal">
+    <div class="modal">
+        <h2>Yeni Proje Oluştur</h2>
+        <div class="form-group">
+            <label>Proje Adı</label>
+            <input type="text" id="newProjName" placeholder="Örn: Django REST API Entegrasyonu">
+        </div>
+        <div class="form-group">
+            <label>Proje Admini Ata</label>
+            <select id="newProjAdmin">
+                </select>
+        </div>
+        <div class="modal-actions">
+            <button class="btn-secondary" onclick="closeModal('newProjectModal')">İptal</button>
+            <button class="btn-primary" onclick="handleCreateProject()">Oluştur</button>
+        </div>
+    </div>
+</div>
