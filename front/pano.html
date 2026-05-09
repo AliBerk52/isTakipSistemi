@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <title>İş Panosu</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <nav class="sidebar">
+        <h2>Proje Admini</h2>
+        <a href="ProjeAdmini.html" class="nav-link">Projelerim</a>
+        <a href="TakımOluştur.html" class="nav-link">Takım Yönetimi</a>
+        <a href="Pano.html" class="nav-link active">Görev Panosu</a>
+    </nav>
+    <main class="main">
+        <div class="header">
+            <h1>Görev Panosu (Kanban)</h1>
+            <button class="btn">+ Görev Ata</button>
+        </div>
+        <div class="pano-container">
+            <div class="column">
+                <h4>YAPILACAK</h4>
+                <div class="task">Veritabanı Tasarımı <br><small>Ali Berk</small></div>
+            </div>
+            <div class="column">
+                <h4>DEVAM EDİYOR</h4>
+                <div class="task" style="border-left: 4px solid var(--warning);">API Entegrasyonu <br><small>Ayşe Kaya</small></div>
+            </div>
+            <div class="column">
+                <h4>BİTTİ</h4>
+            </div>
+        </div>
+    </main>
+</body>
+</html>

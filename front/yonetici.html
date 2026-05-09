@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <title>Yönetici Paneli</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <nav class="sidebar">
+        <h2>Admin Paneli</h2>
+        <a href="Yönetici.html" class="nav-link active">Dashboard</a>
+        <a href="Projeler.html" class="nav-link">Tüm Projeler</a>
+        <a href="İndex.html" class="nav-link" style="color: #ef4444; margin-top: auto;">🚪 Çıkış Yap</a>
+    </nav>
+    <main class="main">
+        <div class="header">
+            <h1>Sistem Özeti</h1>
+            <button class="btn">+ Yeni Proje Aç</button>
+        </div>
+        <div class="grid">
+            <div class="card" onclick="window.location.href='Projeler.html'" style="cursor: pointer; border-left: 4px solid var(--primary);">
+                <h3>📂 Projeleri Yönet</h3>
+                <p>Sistemdeki tüm projeleri ve durumlarını görüntüle.</p>
+            </div>
+            <div class="card">
+                <h3>👥 Çalışanlar</h3>
+                <p>Sistemde kayıtlı toplam 24 çalışan var.</p>
+            </div>
+        </div>
+    </main>
+</body>
+</html>

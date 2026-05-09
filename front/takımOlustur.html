@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <title>Takım Oluştur</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <nav class="sidebar">
+        <h2>Proje Admini</h2>
+        <a href="ProjeAdmini.html" class="nav-link">Projelerim</a>
+        <a href="TakımOluştur.html" class="nav-link active">Takım Yönetimi</a>
+        <a href="Pano.html" class="nav-link">Görev Panosu</a>
+    </nav>
+    <main class="main">
+        <h1>Takım Kurulumu</h1>
+        <div class="card" style="max-width: 600px;">
+            <p>Projeye dahil edilecek çalışanları seçin:</p>
+            <div style="margin: 15px 0; padding: 10px; background: #f3f4f6; border-radius: 8px;">
+                <label><input type="checkbox"> Ali Berk (Backend)</label><br>
+                <label><input type="checkbox"> Ayşe Kaya (Frontend)</label><br>
+                <label><input type="checkbox"> Mehmet (Test)</label>
+            </div>
+            <button class="btn" onclick="window.location.href='ProjeAdmini.html'">Takımı Kaydet</button>
+        </div>
+    </main>
+</body>
+</html>

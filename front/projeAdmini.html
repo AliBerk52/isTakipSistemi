@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <title>Proje Admini</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <nav class="sidebar">
+        <h2>Proje Admini</h2>
+        <a href="ProjeAdmini.html" class="nav-link active">Projelerim</a>
+        <a href="TakımOluştur.html" class="nav-link">Takım Yönetimi</a>
+        <a href="Pano.html" class="nav-link">Görev Panosu</a>
+        <a href="İndex.html" class="nav-link" style="color: #ef4444; margin-top: auto;">🚪 Çıkış Yap</a>
+    </nav>
+    <main class="main">
+        <h1>Sorumlu Olduğum Projeler</h1>
+        <div class="grid" style="margin-top:20px">
+            <div class="card" onclick="window.location.href='Pano.html'" style="cursor: pointer; border-top: 4px solid var(--info);">
+                <h3>📋 Kanban Panosuna Git</h3>
+                <p>Projedeki işlerin durumunu (Yapılacak, Biten vs.) gör.</p>
+            </div>
+            
+            <div class="card" onclick="window.location.href='TakımOluştur.html'" style="cursor: pointer; border-top: 4px solid var(--warning);">
+                <h3>👥 Takım Oluştur / Yönet</h3>
+                <p>Projeye yeni çalışan ekle ve görev dağılımı yap.</p>
+            </div>
+        </div>
+    </main>
+</body>
+</html> 

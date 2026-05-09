@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <title>Benim İşlerim</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <nav class="sidebar">
+        <h2>Çalışan Paneli</h2>
+        <a href="ProjeArayüzü.html" class="nav-link">Dahil Olduğum Projeler</a>
+        <a href="İşlerim.html" class="nav-link active">İşlerim & Loglar</a>
+        <a href="İndex.html" class="nav-link" style="color: #ef4444; margin-top: auto;">🚪 Çıkış Yap</a>
+    </nav>
+    <main class="main">
+        <h1>Bana Atanan Görevler</h1>
+        <div class="card" style="margin-top: 20px;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                    <h3>Veritabanı Tasarımı</h3>
+                    <p style="color: #666;">Web Tasarım Projesi</p>
+                </div>
+                <span style="padding: 5px 10px; background: #fee2e2; color: #ef4444; border-radius: 4px;">Yapılacak</span>
+            </div>
+            <hr style="margin: 15px 0; border: 0; border-top: 1px solid #eee;">
+            
+            <p><strong>Log Ekle (Durum Bildir):</strong></p>
+            <textarea placeholder="Proje adminine iletilmek üzere durum güncellemesi yazın..." style="height: 60px;"></textarea>
+            <button class="btn" style="background: var(--success); margin-top: 10px;" onclick="alert('Log proje adminine gönderildi!')">Log Gönder</button>
+        </div>
+    </main>
+</body>
+</html>
