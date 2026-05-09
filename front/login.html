@@ -198,25 +198,28 @@
 
     <div class="login-container" id="container">
         <div class="form-container sign-up-container">
-            <form action="#" onsubmit="event.preventDefault(); goToIndex();">
-                <div class="logo-text">🚀 İş Takip Pro</div>
+            <form action="/register/" method="post">
+            {% csrf_token %}
+            <div class="logo-text">🚀 İş Takip Pro</div>
                 <h1>Hesap Oluştur</h1>
-                <span>Sisteme dahil olmak için bilgilerinizi girin</span>
-                <input type="text" placeholder="Ad Soyad" required />
-                <input type="email" placeholder="E-Posta" required />
-                <input type="password" placeholder="Şifre" required />
-                <button type="submit">Kayıt Ol</button>
+            <span>Sisteme dahil olmak için bilgilerinizi girin</span>
+            <input type="text" name="username" placeholder="Kullanıcı Adı" required />
+            <input type="email" name="email" placeholder="E-Posta" required />
+            <input type="password" name="password" placeholder="Şifre" required />
+            <input type="password" name="password_confirm" placeholder="Şifre Tekrar" required />
+            <button type="submit">Kayıt Ol</button>
             </form>
         </div>
 
         <div class="form-container sign-in-container">
-            <form action="#" onsubmit="event.preventDefault(); goToIndex();">
+            <form action="/login/" method="post">
+            {% csrf_token %}
                 <div class="logo-text">🚀 İş Takip Pro</div>
                 <h1>Giriş Yap</h1>
                 <span>Hesabınıza erişmek için bilgilerinizi girin</span>
-                <input type="email" placeholder="E-Posta" required />
-                <input type="password" placeholder="Şifre" required />
-                <a href="sifreDegistir.html">Şifrenizi mi unuttunuz?</a>
+                <input type="text" name="username" placeholder="Kullanıcı Adı" required />
+                <input type="password" name="password" placeholder="Şifre" required />
+                <a href="/sifremi-unuttum/">Şifrenizi mi unuttunuz?</a>
                 <button type="submit">Giriş Yap</button>
             </form>
         </div>
@@ -249,10 +252,6 @@
         signInButton.addEventListener('click', () => {
             container.classList.remove("right-panel-active");
         });
-
-        function goToIndex() {
-            window.location.href = 'index.html';
-        }
     </script>
 </body>
 </html>

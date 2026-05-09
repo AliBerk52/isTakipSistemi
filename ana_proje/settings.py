@@ -55,7 +55,7 @@ ROOT_URLCONF = 'ana_proje.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [BASE_DIR / 'front'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -77,8 +77,8 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'is_takip_db',          # MySQL Workbench'te oluşturduğun şema adı
-        'USER': 'root',                 # Genelde varsayılan kullanıcı 'root'tur
-        'PASSWORD': 'alper0707',  # MySQL kurulumunda şifre belirlediysen buraya yaz (yoksa boş bırak '')
+        'USER': 'istakip',                 # Genelde varsayılan kullanıcı 'root'tur
+        'PASSWORD': '123456',  # MySQL kurulumunda şifre belirlediysen buraya yaz (yoksa boş bırak '')
         'HOST': '127.0.0.1',            # Kendi bilgisayarın olduğu için localhost
         'PORT': '3306',                 # MySQL'in standart portu
     }
@@ -126,12 +126,13 @@ SESSION_COOKIE_AGE = 1800  #oturumun zaman aşımı 30 dakika
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True #tarayıcı kapanırsa çıkış
 SESSION_COOKIE_SECURE = True #sadece https üzerinden cookie gönderr
 
-
-
-
-
-
-
-
-
 AUTH_USER_MODEL = 'management_app.User'
+
+# @login_required bizi nereye yönlendirecek? (urls.py içindeki name='login' parametresi)
+LOGIN_URL = 'login'
+
+# Başarılı giriş yapıldıktan sonra nereye gidilecek?
+LOGIN_REDIRECT_URL = 'dashboard'
+
+# Çıkış yapıldıktan sonra nereye dönülecek?
+LOGOUT_REDIRECT_URL = 'login'

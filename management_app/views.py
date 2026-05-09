@@ -69,7 +69,7 @@ def register_view(request):
         messages.success(request, "Kayıt başarılı. Giriş yapabilirsiniz.")
         return redirect('login')
 
-    return render(request, 'auth/register.html', {'form': form})
+    return render(request, 'index.html', {'form': form})
 
 
 def login_view(request):
@@ -89,7 +89,7 @@ def login_view(request):
                 request,
                 f"Çok fazla başarısız giriş denemesi. {LOCKOUT_SECONDS // 60} dakika bekleyin."
             )
-            return render(request, 'auth/login.html', {'form': form, 'locked': True})
+            return render(request, 'login.html', {'form': form, 'locked': True})
 
         if form.is_valid():
             username = form.cleaned_data['username']
@@ -117,7 +117,7 @@ def login_view(request):
                     f"Kullanıcı adı veya şifre hatalı. Kalan deneme hakkı: {max(remaining, 0)}"
                 )
 
-    return render(request, 'auth/login.html', {'form': form})
+    return render(request, 'login.html', {'form': form})
 
 
 def logout_view(request):
@@ -157,7 +157,7 @@ def password_reset_request_view(request):
         )
         return redirect('login')
 
-    return render(request, 'auth/password_reset_request.html', {'form': form})
+    return render(request, 'sifreDegistir.html', {'form': form})
 
 
 def password_reset_confirm_view(request, token: str):
@@ -198,10 +198,7 @@ def dashboard_view(request):
         assigned_worker=request.user
     ).select_related('project', 'status').order_by('-created_at')[:10]
 
-    return render(request, 'dashboard.html', {
-        'my_projects': my_projects,
-        'my_tasks': my_tasks,
-    })
+    return render(request, 'pano.html', {'my_projects': my_projects, 'my_tasks': my_tasks})
 
 
 # -------------------------------------------------------
@@ -462,3 +459,30 @@ def admin_project_list_view(request):
 def admin_log_view(request):
     logs = ActionLog.objects.select_related('user').order_by('-timestamp')
     return render(request, 'admin_panel/logs.html', {'logs': logs})
+
+@login_required
+@role_required(['Admin'])
+def team_create_view(request, project_pk: int):
+    project = get_object_or_404(Project, pk=project_pk)
+    all_users = User.objects.filter(is_active=True).select_related('role')
+    current_members = project.members.values_list('user_id', flat=True)
+
+    if request.method == 'POST':
+        user_id = request.POST.get('user_id')
+        role_id = request.POST.get('role_id')
+        user = get_object_or_404(User, pk=user_id)
+        role = Role.objects.filter(pk=role_id).first()
+        ProjectMember.objects.get_or_create(
+            project=project, user=user,
+            defaults={'role_in_project': role}
+        )
+        log_action(request.user, f"Takıma eklendi: '{user.username}' → '{project.project_name}'")
+        messages.success(request, f"{user.username} takıma eklendi.")
+        return redirect('team_create', project_pk=project_pk)
+
+    return render(request, 'takimOlustur.html', {
+        'project': project,
+        'all_users': all_users,
+        'current_members': current_members,
+        'roles': Role.objects.all(),
+    })
