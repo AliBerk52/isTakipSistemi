@@ -1,25 +1,43 @@
-<!DOCTYPE html>
-<html lang="tr">
-<head>
-    <meta charset="UTF-8">
-    <title>Giriş - İş Takip Sistemi</title>
-    {% load static %}
-    <link rel="stylesheet" href="{% static 'css/style.css' %}">
-</head>
-<body style="justify-content: center; align-items: center; background: #1e1b4b;">
-    <div class="card" style="width: 400px; text-align: center;">
-        <h2>🚀 İş Takip Sistemi</h2>
-        <p style="margin-bottom: 20px; color: #666;">Lütfen rolünüzü seçin:</p>
+{% extends 'base.html' %}
 
-        <button class="btn" style="width: 100%; margin-bottom: 10px;" onclick="window.location.href='/admin-panel/'">
-            👑 Yönetici Girişi
-        </button>
-        <button class="btn" style="width: 100%; margin-bottom: 10px; background: #3b82f6;" onclick="window.location.href='/admin-panel/projects/'">
-            👨‍💼 Proje Admini Girişi
-        </button>
-        <button class="btn" style="width: 100%; background: #10b981;" onclick="window.location.href='/projects/'">
-            👨‍💻 Çalışan Girişi
-        </button>
+{% block title %}Ana Sayfa - İş Takip Pro{% endblock %}
+{% block page_title %}Genel Bakış (Dashboard){% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>Hoş Geldin, {{ request.user.first_name|default:request.user.username }}!</h1>
+</div>
+
+<div class="card-grid">
+    <div class="card">
+        <h3 class="card-title">📂 Projelerim</h3>
+        <p class="card-desc">Dahil olduğunuz aktif projeler.</p>
+        <ul style="list-style: none; padding: 0;">
+            {% for pm in my_projects %}
+                <li style="padding: 10px; border-bottom: 1px solid #eee;">
+                    <a href="{% url 'project_detail' pm.project.pk %}" style="text-decoration: none; color: #4f46e5; font-weight: bold;">
+                        {{ pm.project.project_name }}
+                    </a>
+                </li>
+            {% empty %}
+                <li style="padding: 10px; color: #777;">Henüz bir projeye dahil değilsiniz.</li>
+            {% endfor %}
+        </ul>
     </div>
-</body>
-</html>
+
+    <div class="card">
+        <h3 class="card-title">📋 Son Görevlerim</h3>
+        <p class="card-desc">Size atanan son 10 görev.</p>
+        <ul style="list-style: none; padding: 0;">
+            {% for task in my_tasks %}
+                <li style="padding: 10px; border-bottom: 1px solid #eee;">
+                    <strong>{{ task.task_name }}</strong><br>
+                    <small style="color: #666;">Proje: {{ task.project.project_name }} | Durum: {{ task.status.status_name }}</small>
+                </li>
+            {% empty %}
+                <li style="padding: 10px; color: #777;">Şu an için atanmış bir göreviniz bulunmuyor.</li>
+            {% endfor %}
+        </ul>
+    </div>
+</div>
+{% endblock %}

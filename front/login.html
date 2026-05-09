@@ -196,7 +196,7 @@
 </head>
 <body>
 
-    <div class="login-container" id="container">
+    <div class="login-container {% if form.errors %}right-panel-active{% endif %}" id="container">
         <div class="form-container sign-up-container">
             <form action="/register/" method="post">
             {% csrf_token %}
@@ -264,10 +264,6 @@
         signInButton.addEventListener('click', () => {
             container.classList.remove("right-panel-active");
         });
-
-        {% if form.errors %}
-        container.classList.add("right-panel-active");
-        {% endif %}
     </script>
 </body>
 </html>

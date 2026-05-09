@@ -1,32 +1,37 @@
-<!DOCTYPE html>
-<html lang="tr">
-<head>
-    <meta charset="UTF-8">
-    <title>Tüm Projeler</title>
-    {% load static %}
-    <link rel="stylesheet" href="{% static 'css/style.css' %}">
-</head>
-<body>
-    <nav class="sidebar">
-        <h2>Admin Paneli</h2>
-        <a href="/admin-panel/" class="nav-link">Dashboard</a>
-        <a href="/admin-panel/projects/" class="nav-link active">Tüm Projeler</a>
-        <a href="/logout/" class="nav-link" style="color: #ef4444; margin-top: auto;">🚪 Çıkış Yap</a>
-    </nav>
-    <main class="main">
-        <h1>Sistemdeki Tüm Projeler</h1>
-        <div class="grid" style="margin-top: 20px;">
-            <div class="card">
-                <h3>E-Ticaret Paneli</h3>
-                <p>Proje Admini: Ahmet Yılmaz</p>
-                <p style="color: var(--success);">Durum: Aktif</p>
+{% extends 'base.html' %}
+
+{% block title %}Projelerim - İş Takip Pro{% endblock %}
+{% block page_title %}Projelerim{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>Dahil Olduğum Projeler</h1>
+    {% if request.user.base_role.role_name == 'Project Manager' %}
+        <a href="{% url 'project_create' %}" class="btn btn-primary" style="text-decoration: none;"><i class="fa-solid fa-plus"></i> Yeni Proje Ekle</a>
+    {% endif %}
+</div>
+
+<div class="card-grid">
+    {% for pm in memberships %}
+        <div class="card" style="border-left: 4px solid var(--primary-color);">
+            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 10px;">
+                <h3 class="card-title" style="margin: 0;">{{ pm.project.project_name }}</h3>
+                <span class="badge {% if pm.project.is_active %}badge-success{% else %}badge-warning{% endif %}">
+                    {% if pm.project.is_active %}Aktif{% else %}Pasif{% endif %}
+                </span>
             </div>
-            <div class="card">
-                <h3>Mobil Uygulama X</h3>
-                <p>Proje Admini: Ayşe Kaya</p>
-                <p style="color: var(--warning);">Durum: Beklemede</p>
+            <p class="card-desc">Rolüm: <strong>{{ pm.role_in_project.role_name|default:"Belirtilmemiş" }}</strong></p>
+            
+            <div style="margin-top: 15px;">
+                <a href="{% url 'project_detail' pm.project.pk %}" class="btn btn-primary" style="display: block; text-align: center; text-decoration: none;">Proje Arayüzüne Git</a>
             </div>
         </div>
-    </main>
-</body>
-</html>
+    {% empty %}
+         <div class="card" style="grid-column: 1 / -1; text-align: center; padding: 40px;">
+            <i class="fa-solid fa-folder-open" style="font-size: 3rem; color: #ccc; margin-bottom: 15px;"></i>
+            <h3>Henüz bir projeye dahil değilsiniz.</h3>
+            <p style="color: var(--text-muted);">Yöneticinizin sizi bir takıma eklemesini bekleyin.</p>
+        </div>
+    {% endfor %}
+</div>
+{% endblock %}

@@ -1,29 +1,61 @@
-<!DOCTYPE html>
-<html lang="tr">
-<head>
-    <meta charset="UTF-8">
-    <title>Takım Oluştur</title>
-    {% load static %}
-    <link rel="stylesheet" href="{% static 'css/style.css' %}">
-</head>
-<body>
-    <nav class="sidebar">
-        <h2>Proje Admini</h2>
-        <a href="/admin-panel/projects/" class="nav-link">Projelerim</a>
-        <a href="#" class="nav-link active">Takım Yönetimi</a>
-        <a href="/" class="nav-link">Görev Panosu</a>
-    </nav>
-    <main class="main">
-        <h1>Takım Kurulumu</h1>
-        <div class="card" style="max-width: 600px;">
-            <p>Projeye dahil edilecek çalışanları seçin:</p>
-            <div style="margin: 15px 0; padding: 10px; background: #f3f4f6; border-radius: 8px;">
-                <label><input type="checkbox"> Ali Berk (Backend)</label><br>
-                <label><input type="checkbox"> Ayşe Kaya (Frontend)</label><br>
-                <label><input type="checkbox"> Mehmet (Test)</label>
+{% extends 'base.html' %}
+
+{% block title %}Takım Yönetimi - {{ project.project_name }}{% endblock %}
+{% block page_title %}Takım Yönetimi: {{ project.project_name }}{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <a href="{% url 'project_detail' project.pk %}" class="btn" style="background-color: var(--sidebar-bg); color: white; text-decoration: none;">&larr; Projeye Dön</a>
+</div>
+
+<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+    <div class="card">
+        <h3>Yeni Üye Ekle</h3>
+        <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 20px;">Sistemde kayıtlı kullanıcıları bu projeye dahil edin.</p>
+        
+        <form method="post" style="display: flex; flex-direction: column; gap: 15px;">
+            {% csrf_token %}
+            
+            <div>
+                <label style="font-weight: bold; display: block; margin-bottom: 5px;">Kullanıcı Seçin</label>
+                <select name="user_id" required style="width: 100%; padding: 10px; border: 1px solid var(--border-color); border-radius: 6px;">
+                    <option value="">-- Kullanıcı Seç --</option>
+                    {% for user in all_users %}
+                        {% if user.pk not in current_members %}
+                            <option value="{{ user.pk }}">{{ user.username }} ({{ user.base_role.role_name|default:"Rol Yok" }})</option>
+                        {% endif %}
+                    {% endfor %}
+                </select>
             </div>
-            <button class="btn" onclick="window.location.href='/admin-panel/projects/'">Takımı Kaydet</button>
+            
+            <div>
+                <label style="font-weight: bold; display: block; margin-bottom: 5px;">Projedeki Rolü (Opsiyonel)</label>
+                <select name="role_id" style="width: 100%; padding: 10px; border: 1px solid var(--border-color); border-radius: 6px;">
+                    <option value="">-- Proje İçi Rol Seç --</option>
+                    {% for role in roles %}
+                        <option value="{{ role.pk }}">{{ role.role_name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <button type="submit" class="btn btn-primary" style="margin-top: 10px;">Takıma Ekle</button>
+        </form>
+    </div>
+
+    <div class="card">
+        <h3>Mevcut Takım Üyeleri</h3>
+        <div style="margin-top: 20px; display: flex; flex-direction: column; gap: 10px;">
+            {% for member in project.members.all %}
+                <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px; border: 1px solid #e2e8f0; border-radius: 8px; background-color: #f8fafc;">
+                    <div>
+                        <strong style="display: block;">{{ member.user.username }}</strong>
+                        <span style="font-size: 0.8rem; color: var(--text-muted);">Proje Rolü: {{ member.role_in_project.role_name|default:"Genel Üye" }}</span>
+                    </div>
+                    </div>
+            {% empty %}
+                <p style="color: var(--text-muted); font-style: italic;">Bu projede henüz takım üyesi bulunmuyor.</p>
+            {% endfor %}
         </div>
-    </main>
-</body>
-</html>
+    </div>
+</div>
+{% endblock %}

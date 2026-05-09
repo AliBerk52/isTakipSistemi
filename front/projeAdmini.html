@@ -1,44 +1,51 @@
-<!DOCTYPE html>
-<html lang="tr">
-<head>
-    <meta charset="UTF-8">
-    <title>Proje Admini</title>
-    {% load static %}
-    <link rel="stylesheet" href="{% static 'css/style.css' %}">
-</head>
-<body>
-    <nav class="sidebar">
-        <h2>Proje Admini</h2>
-        <a href="/admin-panel/projects/" class="nav-link active">Projelerim</a>
-        <a href="/" class="nav-link">Görev Panosu</a>
-        <a href="/logout/" class="nav-link" style="color: #ef4444; margin-top: auto;">🚪 Çıkış Yap</a>
-    </nav>
-    <main class="main">
-        <h1>Sorumlu Olduğum Projeler</h1>
-        <div class="grid" style="margin-top: 20px;">
-            {% for project in projects %}
-            <div class="card" style="border-top: 4px solid var(--info);">
-                <h3>{{ project.project_name }}</h3>
-                <p>{{ project.description|default:"Açıklama yok" }}</p>
-                <p style="color: {% if project.is_active %}var(--success){% else %}var(--danger){% endif %};">
-                    Durum: {% if project.is_active %}Aktif{% else %}Pasif{% endif %}
-                </p>
-                <div style="display: flex; gap: 10px; margin-top: 15px;">
-                    <button class="btn" onclick="window.location.href='/projects/{{ project.pk }}/'">
-                        📋 Detay
-                    </button>
-                    <button class="btn" style="background: var(--warning);"
-                        onclick="window.location.href='/yonetim/projeler/{{ project.pk }}/takim/'">
-                        👥 Takım Yönet
-                    </button>
-                </div>
+{% extends 'base.html' %}
+
+{% block title %}Tüm Projeler - İş Takip Pro{% endblock %}
+{% block page_title %}Tüm Projeler{% endblock %}
+
+{% block content %}
+<style>
+    /* Proje Kart Durum Kenarlıkları */
+    .project-card-active { border-top: 4px solid var(--success); }
+    .project-card-inactive { border-top: 4px solid var(--danger); }
+
+    /* Durum Değiştirme Butonları */
+    .btn-status-pasife-al { background-color: var(--warning) !important; color: #000 !important; }
+    .btn-status-aktife-al { background-color: var(--success) !important; color: white !important; }
+</style>
+
+<div class="page-header">
+    <h1>Sistemdeki Tüm Projeler</h1>
+    <a href="{% url 'project_create' %}" class="btn btn-primary" style="text-decoration: none;"><i class="fa-solid fa-plus"></i> Yeni Proje Ekle</a>
+</div>
+
+<div class="card-grid">
+    {% for project in projects %}
+        <div class="card {% if project.is_active %}project-card-active{% else %}project-card-inactive{% endif %}">
+            <h3 class="card-title">{{ project.project_name }}</h3>
+            <p class="card-desc">{{ project.description|truncatewords:15|default:"Açıklama yok." }}</p>
+            <div style="margin-bottom: 15px;">
+                <span class="badge {% if project.is_active %}badge-success{% else %}badge-warning{% endif %}">
+                    {% if project.is_active %}Aktif{% else %}Pasif{% endif %}
+                </span>
+                <span style="font-size: 0.85rem; color: var(--text-muted); float: right;">Bitiş: {{ project.end_date|default:"Belirsiz" }}</span>
             </div>
-            {% empty %}
-            <div class="card">
-                <p>Henüz hiç proje yok.</p>
+            
+            <div style="display: flex; gap: 10px;">
+                 <a href="{% url 'project_detail' project.pk %}" class="btn" style="background-color: var(--sidebar-bg); color: white; text-decoration: none; flex: 1; text-align: center;">Detaylar</a>
+                 
+                 <form action="{% url 'project_toggle' project.pk %}" method="post" style="flex: 1;">
+                     {% csrf_token %}
+                     <button type="submit" class="btn style-reset {% if project.is_active %}btn-status-pasife-al{% else %}btn-status-aktife-al{% endif %}" style="width: 100%;">
+                         {% if project.is_active %}Pasife Al{% else %}Aktife Al{% endif %}
+                     </button>
+                 </form>
             </div>
-            {% endfor %}
         </div>
-    </main>
-</body>
-</html>
+    {% empty %}
+        <div class="card" style="grid-column: 1 / -1;">
+            <p>Sistemde kayıtlı proje bulunmamaktadır.</p>
+        </div>
+    {% endfor %}
+</div>
+{% endblock %}

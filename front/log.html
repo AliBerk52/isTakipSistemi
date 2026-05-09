@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+
+{% block title %}Sistem Logları - İş Takip Pro{% endblock %}
+{% block page_title %}Sistem Aktiviteleri{% endblock %}
+
+{% block content %}
+<div class="card">
+    <table style="width: 100%; border-collapse: collapse; text-align: left;">
+        <thead>
+            <tr style="border-bottom: 2px solid var(--border-color); background-color: #f8fafc;">
+                <th style="padding: 15px; width: 200px;">Tarih / Saat</th>
+                <th style="padding: 15px; width: 200px;">Kullanıcı</th>
+                <th style="padding: 15px;">Gerçekleştirilen İşlem</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for log in logs %}
+                <tr style="border-bottom: 1px solid #e2e8f0;">
+                    <td style="padding: 15px; color: var(--text-muted); font-size: 0.9rem;">{{ log.timestamp|date:"d F Y, H:i:s" }}</td>
+                    <td style="padding: 15px;">
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <div class="avatar" style="width: 25px; height: 25px; font-size: 0.7rem;"><i class="fa-solid fa-user"></i></div>
+                            <strong>{{ log.user.username|default:"Sistem" }}</strong>
+                        </div>
+                    </td>
+                    <td style="padding: 15px; font-family: monospace; background-color: #f8fafc; border-radius: 4px; margin: 5px 0; display: inline-block;">{{ log.action }}</td>
+                </tr>
+            {% empty %}
+                <tr><td colspan="3" style="padding: 20px; text-align: center;">Sistemde henüz bir aktivite kaydı bulunmuyor.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

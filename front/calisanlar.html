@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+
+{% block title %}Kullanıcı Yönetimi - İş Takip Pro{% endblock %}
+{% block page_title %}Sistem Kullanıcıları{% endblock %}
+
+{% block content %}
+<style>
+    .btn-toggle-danger { background-color: var(--danger); }
+    .btn-toggle-success { background-color: var(--success); }
+</style>
+
+<div class="card">
+    <table style="width: 100%; border-collapse: collapse; text-align: left;">
+        <thead>
+            <tr style="border-bottom: 2px solid var(--border-color); background-color: #f8fafc;">
+                <th style="padding: 15px;">Kullanıcı Adı</th>
+                <th style="padding: 15px;">E-Posta</th>
+                <th style="padding: 15px;">Sistem Rolü</th>
+                <th style="padding: 15px;">Üyelik Tipi</th>
+                <th style="padding: 15px;">Durum</th>
+                <th style="padding: 15px; text-align: right;">İşlem</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for user in users %}
+                <tr style="border-bottom: 1px solid #e2e8f0;">
+                    <td style="padding: 15px;"><strong>{{ user.username }}</strong></td>
+                    <td style="padding: 15px; color: var(--text-muted);">{{ user.email|default:"-" }}</td>
+                    <td style="padding: 15px;"><span class="badge" style="background-color: #6366f1;">{{ user.base_role.role_name|default:"Atanmamış" }}</span></td>
+                    <td style="padding: 15px;">{{ user.membership.name|default:"Yok" }}</td>
+                    <td style="padding: 15px;">
+                        {% if user.is_active %}
+                            <span style="color: var(--success); font-weight: bold;">Aktif</span>
+                        {% else %}
+                            <span style="color: var(--danger); font-weight: bold;">Pasif</span>
+                        {% endif %}
+                    </td>
+                    <td style="padding: 15px; text-align: right;">
+                        <form action="{% url 'admin_user_toggle' user.pk %}" method="post">
+                            {% csrf_token %}
+                            <button type="submit" 
+                                    class="btn {% if user.is_active %}btn-toggle-danger{% else %}btn-toggle-success{% endif %}" 
+                                    style="padding: 6px 12px; font-size: 0.8rem; color: white;" 
+                                    {% if request.user == user %}disabled{% endif %}>
+                                {% if user.is_active %}Pasife Al{% else %}Aktife Al{% endif %}
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+            {% empty %}
+                <tr><td colspan="6" style="padding: 20px; text-align: center;">Sistemde kayıtlı kullanıcı bulunamadı.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
