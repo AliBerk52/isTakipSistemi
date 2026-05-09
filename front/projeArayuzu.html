@@ -1,28 +1,83 @@
-<!DOCTYPE html>
-<html lang="tr">
-<head>
-    <meta charset="UTF-8">
-    <title>Çalışan Paneli</title>
-    {% load static %}
-    <link rel="stylesheet" href="{% static 'css/style.css' %}">
-</head>
-<body>
-    <nav class="sidebar">
-        <h2>Çalışan Paneli</h2>
-        <a href="/projects/" class="nav-link active">Dahil Olduğum Projeler</a>
-        <a href="/tasks/" class="nav-link">İşlerim & Loglar</a>
-        <a href="/logout/" class="nav-link" style="color: #ef4444; margin-top: auto;">🚪 Çıkış Yap</a>
-    </nav>
-    <main class="main">
-        <h1>Dahil Olduğum Projeler</h1>
-        <div class="grid" style="margin-top: 20px;">
-            <div class="card" onclick="window.location.href='/tasks/'" style="cursor: pointer; border-left: 4px solid var(--primary);">
-                <h3>Web Tasarım Projesi</h3>
-                <p>Admin: Ahmet Bey</p>
-                <br>
-                <strong style="color: var(--primary);">👉 İşlerimi Görmek İçin Tıkla</strong>
+{% extends 'base.html' %}
+
+{% block title %}{{ project.project_name }} - İş Takip Pro{% endblock %}
+{% block page_title %}{{ project.project_name }}{% endblock %}
+
+{% block content %}
+<style>
+    /* Görev Kartı Sol Kenarlık Renkleri */
+    .task-card { border-left: 4px solid #64748b; } /* Varsayılan */
+    .task-todo { border-left-color: #3b82f6 !important; }
+    .task-inprogress { border-left-color: #f59e0b !important; }
+    .task-issue { border-left-color: #ef4444 !important; }
+    .task-done { border-left-color: #10b981 !important; }
+
+    /* Badge (Etiket) Arka Plan Renkleri */
+    .bg-todo { background-color: #3b82f6; }
+    .bg-inprogress { background-color: #f59e0b; }
+    .bg-issue { background-color: #ef4444; }
+    .bg-done { background-color: #10b981; }
+</style>
+
+<div class="page-header">
+    <div>
+        <h1 style="margin-bottom: 5px;">{{ project.project_name }}</h1>
+        <p style="color: var(--text-muted); font-size: 0.9rem;">
+            Başlangıç: {{ project.start_date|date:"d M Y" }} | Bitiş: {{ project.end_date|date:"d M Y"|default:"Belirtilmemiş" }}
+        </p>
+    </div>
+    <div style="display: flex; gap: 10px;">
+        {% if request.user.base_role.role_name == 'Project Manager' or request.user.base_role.role_name == 'Admin' %}
+            <a href="{% url 'team_create' project.pk %}" class="btn" style="background-color: var(--sidebar-bg); color: white; text-decoration: none;">👥 Takım Yönetimi</a>
+            <a href="{% url 'task_create' project.pk %}" class="btn btn-primary" style="text-decoration: none;"><i class="fa-solid fa-plus"></i> Görev Ekle</a>
+        {% endif %}
+    </div>
+</div>
+
+<div class="card" style="margin-bottom: 20px;">
+    <h3 style="font-size: 1.1rem; margin-bottom: 10px;">Takım Üyeleri</h3>
+    <div style="display: flex; gap: 15px; flex-wrap: wrap;">
+        {% for member in members %}
+            <div style="background-color: #f8fafc; padding: 8px 15px; border-radius: 20px; border: 1px solid #e2e8f0; font-size: 0.9rem;">
+                <i class="fa-solid fa-user" style="color: var(--text-muted); margin-right: 5px;"></i>
+                <strong>{{ member.user.username }}</strong> ({{ member.role_in_project.role_name|default:"Üye" }})
             </div>
+        {% empty %}
+            <span style="color: var(--text-muted);">Henüz takıma üye eklenmemiş.</span>
+        {% endfor %}
+    </div>
+</div>
+
+<h3 style="margin: 25px 0 15px 0;">Görevler</h3>
+<div class="card-grid">
+    {% for task in tasks %}
+        <div class="card task-card 
+            {% if task.status.status_name == 'Yapılacak' %}task-todo
+            {% elif task.status.status_name == 'Devam Ediyor' %}task-inprogress
+            {% elif task.status.status_name == 'Sorun Var' %}task-issue
+            {% else %}task-done{% endif %}">
+            
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px;">
+                <h4 style="margin: 0;">{{ task.task_name }}</h4>
+                
+                <span class="badge 
+                    {% if task.status.status_name == 'Yapılacak' %}bg-todo
+                    {% elif task.status.status_name == 'Devam Ediyor' %}bg-inprogress
+                    {% elif task.status.status_name == 'Sorun Var' %}bg-issue
+                    {% else %}bg-done{% endif %}">
+                    {{ task.status.status_name }}
+                </span>
+            </div>
+            <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 15px;">
+                Atanan: <strong>{{ task.assigned_worker.username|default:"Atanmamış" }}</strong>
+            </p>
+            <a href="{% url 'task_detail' task.pk %}" class="btn" style="background-color: #e2e8f0; color: #333; text-decoration: none; display: block; text-align: center; font-size: 0.85rem;">Görevi Görüntüle</a>
         </div>
-    </main>
-</body>
-</html>
+    {% empty %}
+        <div class="card" style="grid-column: 1 / -1; text-align: center; padding: 30px;">
+            <p style="color: var(--text-muted);">Bu projede henüz bir görev oluşturulmamış.</p>
+        </div>
+    {% endfor %}
+</div>
+
+{% endblock %}

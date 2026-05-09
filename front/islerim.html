@@ -1,34 +1,93 @@
-<!DOCTYPE html>
-<html lang="tr">
-<head>
-    <meta charset="UTF-8">
-    <title>Benim İşlerim</title>
-    {% load static %}
-    <link rel="stylesheet" href="{% static 'css/style.css' %}">
-</head>
-<body>
-    <nav class="sidebar">
-        <h2>Çalışan Paneli</h2>
-        <a href="/projects/" class="nav-link">Dahil Olduğum Projeler</a>
-        <a href="/tasks/" class="nav-link active">İşlerim & Loglar</a>
-        <a href="/logout/" class="nav-link" style="color: #ef4444; margin-top: auto;">🚪 Çıkış Yap</a>
-    </nav>
-    <main class="main">
-        <h1>Bana Atanan Görevler</h1>
-        <div class="card" style="margin-top: 20px;">
-            <div style="display: flex; justify-content: space-between; align-items: center;">
-                <div>
-                    <h3>Veritabanı Tasarımı</h3>
-                    <p style="color: #666;">Web Tasarım Projesi</p>
-                </div>
-                <span style="padding: 5px 10px; background: #fee2e2; color: #ef4444; border-radius: 4px;">Yapılacak</span>
-            </div>
-            <hr style="margin: 15px 0; border: 0; border-top: 1px solid #eee;">
+{% extends 'base.html' %}
 
-            <p><strong>Log Ekle (Durum Bildir):</strong></p>
-            <textarea placeholder="Proje adminine iletilmek üzere durum güncellemesi yazın..." style="height: 60px;"></textarea>
-            <button class="btn" style="background: var(--success); margin-top: 10px;" onclick="alert('Log proje adminine gönderildi!')">Log Gönder</button>
+{% block title %}Görev Detayı - İş Takip Pro{% endblock %}
+{% block page_title %}Görev: {{ task.task_name }}{% endblock %}
+
+{% block content %}
+<style>
+    /* Kart Kenarlık Renkleri */
+    .task-card-main { border-left: 4px solid #64748b; margin-bottom: 20px; }
+    .border-todo { border-left-color: #3b82f6 !important; }
+    .border-inprogress { border-left-color: #f59e0b !important; }
+    .border-issue { border-left-color: #ef4444 !important; }
+    .border-done { border-left-color: #10b981 !important; }
+
+    /* Etiket (Badge) Arka Plan Renkleri */
+    .badge-todo { background-color: #3b82f6; }
+    .badge-inprogress { background-color: #f59e0b; }
+    .badge-issue { background-color: #ef4444; }
+    .badge-done { background-color: #10b981; }
+    .badge-default { background-color: #64748b; }
+</style>
+
+<div class="page-header">
+    <div>
+        <h1 style="margin-bottom: 5px;">{{ task.task_name }}</h1>
+        <p style="color: var(--text-muted);">Proje: <a href="{% url 'project_detail' task.project.pk %}" style="color: var(--primary-color);">{{ task.project.project_name }}</a></p>
+    </div>
+    {% if request.user == task.assigned_worker or request.user.base_role.role_name == 'Project Manager' or request.user.base_role.role_name == 'Admin' %}
+        <a href="{% url 'task_update' task.pk %}" class="btn btn-primary" style="text-decoration: none;">Görevi Düzenle</a>
+    {% endif %}
+</div>
+
+<div style="display: grid; grid-template-columns: 2fr 1fr; gap: 20px;">
+    <div>
+        <div class="card task-card-main 
+            {% if task.status.status_name == 'Yapılacak' %}border-todo
+            {% elif task.status.status_name == 'Devam Ediyor' %}border-inprogress
+            {% elif task.status.status_name == 'Sorun Var' %}border-issue
+            {% elif task.status.status_name == 'Tamamlandı' %}border-done{% endif %}">
+            
+            <h3>Görev Açıklaması</h3>
+            <p style="white-space: pre-line; line-height: 1.6; margin-top: 15px;">{{ task.description|default:"Bu görev için bir açıklama girilmemiş." }}</p>
         </div>
-    </main>
-</body>
-</html>
+
+        <div class="card">
+            <h3>Yorumlar ve Güncellemeler</h3>
+            <div style="margin-top: 20px; display: flex; flex-direction: column; gap: 15px;">
+                {% for comment in comments %}
+                    <div style="background-color: #f8fafc; padding: 15px; border-radius: 8px; border: 1px solid #e2e8f0;">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 0.85rem;">
+                            <strong>{{ comment.user.username }}</strong>
+                            <span style="color: var(--text-muted);">{{ comment.created_at|date:"d M Y H:i" }}</span>
+                        </div>
+                        <p style="margin: 0; font-size: 0.95rem;">{{ comment.content }}</p>
+                    </div>
+                {% empty %}
+                    <p style="color: var(--text-muted); font-style: italic;">Henüz yorum yapılmamış.</p>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <div>
+        <div class="card" style="background-color: #f8fafc;">
+            <h3 style="margin-bottom: 20px; font-size: 1.1rem; border-bottom: 1px solid #e2e8f0; padding-bottom: 10px;">Görev Bilgileri</h3>
+            
+            <div style="margin-bottom: 15px;">
+                <span style="color: var(--text-muted); font-size: 0.85rem; display: block; margin-bottom: 5px;">Durum</span>
+                
+                <span class="badge 
+                    {% if task.status.status_name == 'Yapılacak' %}badge-todo
+                    {% elif task.status.status_name == 'Devam Ediyor' %}badge-inprogress
+                    {% elif task.status.status_name == 'Sorun Var' %}badge-issue
+                    {% elif task.status.status_name == 'Tamamlandı' %}badge-done
+                    {% else %}badge-default{% endif %}" 
+                    style="font-size: 0.9rem; padding: 6px 12px;">
+                    {{ task.status.status_name }}
+                </span>
+            </div>
+            
+            <div style="margin-bottom: 15px;">
+                <span style="color: var(--text-muted); font-size: 0.85rem; display: block; margin-bottom: 5px;">Atanan Çalışan</span>
+                <strong>{{ task.assigned_worker.username|default:"Atanmamış" }}</strong>
+            </div>
+            
+            <div style="margin-bottom: 15px;">
+                <span style="color: var(--text-muted); font-size: 0.85rem; display: block; margin-bottom: 5px;">Tarih</span>
+                <span>{{ task.created_at|date:"d M Y" }}</span>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
