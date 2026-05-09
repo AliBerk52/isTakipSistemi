@@ -1,6 +1,6 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm, UserChangeForm
-from .models import User, Project, Task, Comment
+from .models import User, Project, Task
 
 class RegisterForm(UserCreationForm):
     email = forms.EmailField()
@@ -26,11 +26,6 @@ class TaskForm(forms.ModelForm):
     class Meta:
         model = Task
         fields = ['task_name', 'description', 'assigned_worker', 'status']
-
-class CommentForm(forms.ModelForm):
-    class Meta:
-        model = Comment
-        fields = ['content']
 
 class PasswordResetRequestForm(forms.Form):
     email = forms.EmailField()

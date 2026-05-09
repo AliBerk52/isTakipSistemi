@@ -4,14 +4,16 @@ from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
 from django.contrib import messages
 from django.core.cache import cache
+from django.utils import timezone
+from datetime import timedelta
 import secrets
 
 from .models import (
     User, UserProfile, Project, ProjectMember, Task, TaskStatus,
-    Comment, ActionLog, PasswordResetToken, Role
+    PasswordResetToken, Role
 )
 from .forms import (
-    RegisterForm, LoginForm, ProjectForm, TaskForm, CommentForm,
+    RegisterForm, LoginForm, ProjectForm, TaskForm,
     PasswordResetRequestForm, PasswordResetConfirmForm
 )
 from .decorators import role_required
@@ -161,6 +163,11 @@ def password_reset_confirm_view(request, token: str):
     reset_token = PasswordResetToken.objects.filter(token=token).first()
     if not reset_token:
         messages.error(request, "Geçersiz veya süresi dolmuş bağlantı.")
+        return redirect('password_reset_request')
+
+    if timezone.now() - reset_token.createdAt > timedelta(minutes=15):
+        reset_token.delete()
+        messages.error(request, "Bağlantının süresi dolmuş.")
         return redirect('password_reset_request')
 
     form = PasswordResetConfirmForm(request.POST or None)
