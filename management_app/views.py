@@ -10,10 +10,10 @@ import secrets
 
 from .models import (
     User, UserProfile, Project, ProjectMember, Task, TaskStatus,
-    Comment, ActionLog, PasswordResetToken, Role
+    PasswordResetToken, Role
 )
 from .forms import (
-    RegisterForm, LoginForm, ProjectForm, TaskForm, CommentForm,
+    RegisterForm, LoginForm, ProjectForm, TaskForm,
     PasswordResetRequestForm, PasswordResetConfirmForm
 )
 from .decorators import role_required
