@@ -7,10 +7,11 @@ from django.core.cache import cache
 from django.utils import timezone
 from datetime import timedelta
 import secrets
+from .forms import TaskForm, CommentForm
 
 from .models import (
     User, UserProfile, Project, ProjectMember, Task, TaskStatus,
-    PasswordResetToken, Role
+    PasswordResetToken, Role, ActionLog, Comment
 )
 from .forms import (
     RegisterForm, LoginForm, ProjectForm, TaskForm,

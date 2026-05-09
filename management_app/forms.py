@@ -1,13 +1,13 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm, UserChangeForm
-from .models import User, Project, Task
+from .models import User, Project, Task, Comment
 
 class RegisterForm(UserCreationForm):
-    email = forms.EmailField()
+    email = forms.EmailField(required=True)
     
     class Meta:
         model = User
-        fields = ('username', 'email', 'password1', 'password2')
+        fields = ('username', 'email', 'first_name', 'last_name')
 
 class LoginForm(forms.Form):
     username = forms.CharField(max_length=150)
@@ -26,6 +26,11 @@ class TaskForm(forms.ModelForm):
     class Meta:
         model = Task
         fields = ['task_name', 'description', 'assigned_worker', 'status']
+
+class CommentForm(forms.ModelForm):
+    class Meta:
+        model = Comment
+        fields = ['content']
 
 class PasswordResetRequestForm(forms.Form):
     email = forms.EmailField()
