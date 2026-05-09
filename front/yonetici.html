@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <title>Yönetici Paneli</title>
-    <link rel="stylesheet" href="css/style.css">
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
 </head>
 <body>
     <nav class="sidebar">
@@ -18,7 +19,7 @@
             <button class="btn">+ Yeni Proje Aç</button>
         </div>
         <div class="grid">
-            <div class="card" onclick="window.location.href='projeler.html'" style="cursor: pointer; border-left: 4px solid var(--primary);">
+            <div class="card" onclick="window.location.href='/admin-panel/projects/'" style="cursor: pointer; border-left: 4px solid var(--primary);">
                 <h3>📂 Projeleri Yönet</h3>
                 <p>Sistemdeki tüm projeleri ve durumlarını görüntüle.</p>
             </div>

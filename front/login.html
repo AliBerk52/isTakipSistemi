@@ -200,14 +200,26 @@
         <div class="form-container sign-up-container">
             <form action="/register/" method="post">
             {% csrf_token %}
-            <div class="logo-text">🚀 İş Takip Pro</div>
+                {% if form.errors %}
+                    <div style="color: red; font-size: 12px; margin-bottom: 10px;">
+                        {% for field in form %}
+                            {% for error in field.errors %}
+                                <p>{{ error }}</p>
+                                {% endfor %}
+                                {% endfor %}
+                                {% for error in form.non_field_errors %}
+                            <p>{{ error }}</p>
+                            {% endfor %}
+                    </div>
+                {% endif %}
+                <div class="logo-text">🚀 İş Takip Pro</div>
                 <h1>Hesap Oluştur</h1>
-            <span>Sisteme dahil olmak için bilgilerinizi girin</span>
-            <input type="text" name="username" placeholder="Kullanıcı Adı" required />
-            <input type="email" name="email" placeholder="E-Posta" required />
-            <input type="password" name="password" placeholder="Şifre" required />
-            <input type="password" name="password_confirm" placeholder="Şifre Tekrar" required />
-            <button type="submit">Kayıt Ol</button>
+                <span>Sisteme dahil olmak için bilgilerinizi girin</span>
+                <input type="text" name="username" placeholder="Kullanıcı Adı" required />
+                <input type="email" name="email" placeholder="E-Posta" required />
+                <input type="password" name="password1" placeholder="Şifre" required />
+                <input type="password" name="password2" placeholder="Şifre Tekrar" required />
+                <button type="submit">Kayıt Ol</button>
             </form>
         </div>
 
@@ -252,6 +264,10 @@
         signInButton.addEventListener('click', () => {
             container.classList.remove("right-panel-active");
         });
+
+        {% if form.errors %}
+        container.classList.add("right-panel-active");
+        {% endif %}
     </script>
 </body>
 </html>

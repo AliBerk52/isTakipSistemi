@@ -3,19 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <title>Çalışan Paneli</title>
-    <link rel="stylesheet" href="css/style.css">
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
 </head>
 <body>
     <nav class="sidebar">
         <h2>Çalışan Paneli</h2>
-        <a href="projeArayuzu.html" class="nav-link active">Dahil Olduğum Projeler</a>
-        <a href="islerim.html" class="nav-link">İşlerim & Loglar</a>
-        <a href="index.html" class="nav-link" style="color: #ef4444; margin-top: auto;">🚪 Çıkış Yap</a>
+        <a href="/projects/" class="nav-link active">Dahil Olduğum Projeler</a>
+        <a href="/tasks/" class="nav-link">İşlerim & Loglar</a>
+        <a href="/logout/" class="nav-link" style="color: #ef4444; margin-top: auto;">🚪 Çıkış Yap</a>
     </nav>
     <main class="main">
         <h1>Dahil Olduğum Projeler</h1>
         <div class="grid" style="margin-top: 20px;">
-            <div class="card" onclick="window.location.href='islerim.html'" style="cursor: pointer; border-left: 4px solid var(--primary);">
+            <div class="card" onclick="window.location.href='/tasks/'" style="cursor: pointer; border-left: 4px solid var(--primary);">
                 <h3>Web Tasarım Projesi</h3>
                 <p>Admin: Ahmet Bey</p>
                 <br>

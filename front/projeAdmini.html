@@ -3,29 +3,30 @@
 <head>
     <meta charset="UTF-8">
     <title>Proje Admini</title>
-    <link rel="stylesheet" href="css/style.css">
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
 </head>
 <body>
     <nav class="sidebar">
         <h2>Proje Admini</h2>
-        <a href="projeAdmini.html" class="nav-link active">Projelerim</a>
-        <a href="takimOluştur.html" class="nav-link">Takım Yönetimi</a>
-        <a href="pano.html" class="nav-link">Görev Panosu</a>
-        <a href="index.html" class="nav-link" style="color: #ef4444; margin-top: auto;">🚪 Çıkış Yap</a>
+        <a href="/admin-panel/projects/" class="nav-link active">Projelerim</a>
+        <a href="/yonetim/projeler/{{ project.pk }}/takim/" class="nav-link">Takım Yönetimi</a>
+        <a href="/" class="nav-link">Görev Panosu</a>
+        <a href="/logout/" class="nav-link" style="color: #ef4444; margin-top: auto;">🚪 Çıkış Yap</a>
     </nav>
     <main class="main">
         <h1>Sorumlu Olduğum Projeler</h1>
         <div class="grid" style="margin-top:20px">
-            <div class="card" onclick="window.location.href='pano.html'" style="cursor: pointer; border-top: 4px solid var(--info);">
+            <div class="card" onclick="window.location.href='/'" style="cursor: pointer; border-top: 4px solid var(--info);">
                 <h3>📋 Kanban Panosuna Git</h3>
                 <p>Projedeki işlerin durumunu (Yapılacak, Biten vs.) gör.</p>
             </div>
-            
-            <div class="card" onclick="window.location.href='takimOlustur.html'" style="cursor: pointer; border-top: 4px solid var(--warning);">
+
+            <div class="card" onclick="window.location.href='/yonetim/projeler/{{ project.pk }}/takim/'" style="cursor: pointer; border-top: 4px solid var(--warning);">
                 <h3>👥 Takım Oluştur / Yönet</h3>
                 <p>Projeye yeni çalışan ekle ve görev dağılımı yap.</p>
             </div>
         </div>
     </main>
 </body>
-</html> 
+</html>

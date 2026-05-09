@@ -3,14 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <title>İş Panosu</title>
-    <link rel="stylesheet" href="css/style.css">
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
 </head>
 <body>
     <nav class="sidebar">
         <h2>Proje Admini</h2>
-        <a href="projeAdmini.html" class="nav-link">Projelerim</a>
-        <a href="takimOlustur.html" class="nav-link">Takım Yönetimi</a>
-        <a href="pano.html" class="nav-link active">Görev Panosu</a>
+        <a href="/admin-panel/projects/" class="nav-link">Projelerim</a>
+        <a href="/yonetim/projeler/{{ project.pk }}/takim/" class="nav-link">Takım Yönetimi</a>
+        <a href="/" class="nav-link active">Görev Panosu</a>
     </nav>
     <main class="main">
         <div class="header">

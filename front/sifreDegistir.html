@@ -134,10 +134,9 @@
         <h1>Şifrenizi mi Unuttunuz?</h1>
         <p>Hesabınıza bağlı e-posta adresinizi girin, size şifre sıfırlama bağlantısını içeren bir mail gönderelim.</p>
         
-        <form action="/sifremi-unuttum/" method="post">
-        {% csrf_token %}
-        <input type="email" name="email" placeholder="E-posta Adresiniz" required />
-        <button type="submit">Bağlantı Gönder</button>
+        <form id="reset-form" onsubmit="handleReset(event)">
+            <input type="email" id="email" placeholder="E-posta Adresiniz" required />
+            <button type="submit">Bağlantı Gönder</button>
         </form>
 
         <div id="success-message">
@@ -146,5 +145,20 @@
 
         <a href="/login/" class="back-to-login">← Giriş Ekranına Dön</a>
     </div>
+
+    <script>
+        function handleReset(event) {
+            event.preventDefault();
+            const email = document.getElementById('email').value;
+            const form = document.getElementById('reset-form');
+            const message = document.getElementById('success-message');
+
+            // Formu gizle ve başarı mesajını göster (Simülasyon)
+            form.style.display = 'none';
+            message.style.display = 'block';
+
+            console.log("Sıfırlama talebi gönderildi: " + email);
+        }
+    </script>
 </body>
 </html>

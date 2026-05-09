@@ -3,11 +3,9 @@ from django.contrib.auth.forms import UserCreationForm, UserChangeForm
 from .models import User, Project, Task, Comment
 
 class RegisterForm(UserCreationForm):
-    email = forms.EmailField(required=True)
-    
     class Meta:
         model = User
-        fields = ('username', 'email', 'first_name', 'last_name')
+        fields = ['username', 'email']
 
 class LoginForm(forms.Form):
     username = forms.CharField(max_length=150)

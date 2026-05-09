@@ -9,8 +9,8 @@ def role_required(allowed_roles:list):
                 raise PermissionDenied
 
             user_role_name = None
-            if request.user.role:
-                user_role_name = request.user.role.role_name
+            if request.user.base_role:
+                user_role_name = request.user.base_role.role_name
 
             if user_role_name not in allowed_roles:
                 raise PermissionDenied

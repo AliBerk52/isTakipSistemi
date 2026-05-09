@@ -119,7 +119,8 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
-STATIC_URL = 'static/'
+STATICFILES_DIRS = [BASE_DIR / 'front']
+STATIC_URL = '/static/'
 
 
 SESSION_COOKIE_AGE = 1800  #oturumun zaman aşımı 30 dakika
