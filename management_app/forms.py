@@ -21,6 +21,19 @@ class ProjectForm(forms.ModelForm):
         }
 
 class TaskForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        # 1. views.py'den gelen 'project' argümanını kwargs'tan çıkar ve yakala
+        project = kwargs.pop('project', None)
+        super(TaskForm, self).__init__(*args, **kwargs)
+
+        # 2. Eğer proje verisi geldiyse dropdown listesini filtrele
+        if project:
+            # Sadece projeye atanmış aktif kullanıcıları listele
+            self.fields['assigned_worker'].queryset = User.objects.filter(
+                project_assignments__project=project,
+                is_active=True
+            ).distinct()
+
     class Meta:
         model = Task
         fields = ['task_name', 'description', 'assigned_worker', 'status']

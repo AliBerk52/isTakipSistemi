@@ -191,7 +191,8 @@ def project_create_view(request):
     form = ProjectForm(request.POST or None)
     if request.method == 'POST' and form.is_valid():
         project = form.save()
-        pm_role = Role.objects.filter(role_name='Project Manager').first()
+        pm_role = Role.objects.filter(role_name='Project Manager').first() or \
+                  Role.objects.filter(role_name='Admin').first()
         ProjectMember.objects.create(
             project=project,
             user=request.user,
@@ -201,7 +202,7 @@ def project_create_view(request):
         messages.success(request, "Proje başarıyla oluşturuldu.")
         return redirect('project_detail', pk=project.pk)
 
-    return render(request, 'projeArayuzu.html', {'form': form, 'action': 'Oluştur'})
+    return render(request, 'projeOlustur.html', {'form': form, 'action': 'Oluştur'})
 
 
 @login_required
