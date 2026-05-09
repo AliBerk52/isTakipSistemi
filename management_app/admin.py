@@ -10,11 +10,11 @@ from .models import (
 
 @admin.register(User)
 class UserAdmin(BaseUserAdmin):
-    list_display = ['username', 'email', 'first_name', 'last_name', 'role', 'membership', 'is_active']
-    list_filter = ['role', 'membership', 'is_active', 'is_staff']
+    list_display = ['username', 'email', 'first_name', 'last_name', 'base_role', 'membership', 'is_active']
+    list_filter = ['base_role', 'membership', 'is_active', 'is_staff']
     search_fields = ['username', 'email', 'first_name', 'last_name']
     fieldsets = BaseUserAdmin.fieldsets + (
-        ('Proje Sistemi', {'fields': ('role', 'membership')}),
+        ('Proje Sistemi', {'fields': ('base_role', 'membership')}),
     )
 
 
