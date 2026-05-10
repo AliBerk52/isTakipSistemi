@@ -1,3 +1,5 @@
+from urllib import request
+
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.decorators import login_required
@@ -93,7 +95,8 @@ def login_view(request):
         if form.is_valid():
             username = form.cleaned_data['username']
             password = form.cleaned_data['password']
-            remember_me = form.cleaned_data.get('remember_me', False)
+            # Kutucuğun durumunu doğrudan HTML formundan (POST) okuyoruz:
+            remember_me = request.POST.get('remember_me') == 'on'
 
             user = authenticate(request, username=username, password=password)
             if user:

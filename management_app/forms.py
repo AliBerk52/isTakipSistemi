@@ -10,6 +10,7 @@ class RegisterForm(UserCreationForm):
 class LoginForm(forms.Form):
     username = forms.CharField(max_length=150)
     password = forms.CharField(widget=forms.PasswordInput)
+    remember_me = forms.BooleanField(required=False)
 
 class ProjectForm(forms.ModelForm):
     class Meta:
