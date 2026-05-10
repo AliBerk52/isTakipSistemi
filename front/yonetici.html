@@ -3,7 +3,7 @@
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-4">
     <h2 class="fw-bold"><i class="fa-solid fa-user-shield text-primary me-2"></i>Yönetici Kontrol Paneli</h2>
-    <a href="{% url 'projeOlustur' %}" class="btn btn-primary"><i class="fa-solid fa-plus me-2"></i>Yeni Proje</a>
+    <a href="{% url 'project_create' %}" class="btn btn-primary"><i class="fa-solid fa-plus me-2"></i>Yeni Proje</a>
 </div>
 
 <div class="card border-0 shadow-sm rounded-4">
@@ -23,7 +23,7 @@
                 <tbody>
                     {% for proje in all_projects %}
                     <tr>
-                        <td class="fw-bold">{{ proje.isim }}</td>
+                        <td class="fw-bold">{{ proje.isim|default:proje.name }}</td>
                         <td>
                             {% if proje.admin %}
                                 <span class="badge bg-info text-dark"><i class="fa-solid fa-star me-1"></i>{{ proje.admin.username }}</span>
@@ -49,7 +49,8 @@
 
                     <div class="modal fade" id="assignModal{{ proje.id }}" tabindex="-1">
                         <div class="modal-dialog">
-                            <form method="POST" action="#"> {% csrf_token %}
+                            <form method="POST" action="#">
+                                {% csrf_token %}
                                 <div class="modal-content">
                                     <div class="modal-header"><h5>Proje Admini Seç</h5></div>
                                     <div class="modal-body">
