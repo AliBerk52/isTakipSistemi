@@ -1,31 +1,113 @@
 {% extends 'base.html' %}
 
+{% block title %}Çalışan Yönetimi | İş Takip Sistemi{% endblock %}
+
 {% block content %}
-<h2 class="fw-bold mb-4"><i class="fa-solid fa-users text-primary me-2"></i>Tüm Çalışanlar</h2>
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h2 class="fw-bold text-dark mb-1">
+            <i class="fa-solid fa-users-gear text-primary me-2"></i>Çalışan Listesi
+        </h2>
+        <p class="text-muted mb-0">Sistemde kayıtlı olan ve projelerde görev alabilecek aktif personeller.</p>
+    </div>
+    <div class="text-end">
+        <span class="badge bg-success px-3 py-2 rounded-pill shadow-sm">
+            <i class="fa-solid fa-circle-check me-1"></i> {{ employees.count }} Aktif Çalışan
+        </span>
+    </div>
+</div>
+
+<div class="card border-0 shadow-sm rounded-4 mb-4">
+    <div class="card-body p-3">
+        <div class="row g-3">
+            <div class="col-md-8">
+                <div class="input-group">
+                    <span class="input-group-text bg-white border-end-0 text-muted">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                    </span>
+                    <input type="text" class="form-control border-start-0" placeholder="İsim veya e-posta ile ara...">
+                </div>
+            </div>
+            <div class="col-md-4">
+                <select class="form-select">
+                    <option selected>Tüm Departmanlar</option>
+                    <option>Yazılım</option>
+                    <option>Tasarım</option>
+                    <option>Pazarlama</option>
+                </select>
+            </div>
+        </div>
+    </div>
+</div>
 
 <div class="row g-4">
-    {% for calisan in all_users %}
-    <div class="col-md-4 col-lg-3">
-        <div class="card border-0 shadow-sm rounded-4 text-center p-3">
-            <div class="card-body">
-                <div class="bg-light rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 80px; height: 80px;">
-                    <i class="fa-solid fa-user fa-3x text-secondary"></i>
+    {% for emp in employees %}
+    <div class="col-md-6 col-lg-4 col-xl-3">
+        <div class="card border-0 shadow-sm rounded-4 h-100 employee-card">
+            <div class="card-body p-4 text-center">
+                <div class="position-relative d-inline-block mb-3">
+                    <div class="bg-light rounded-circle d-flex align-items-center justify-content-center shadow-sm" style="width: 90px; height: 90px;">
+                        <i class="fa-solid fa-user-tie fa-4x text-secondary"></i>
+                    </div>
+                    <span class="position-absolute bottom-0 end-0 bg-success border border-white border-3 rounded-circle p-2" 
+                          data-bs-toggle="tooltip" title="Şu an Aktif"></span>
                 </div>
-                <h5 class="fw-bold mb-1">{{ calisan.username }}</h5>
-                <p class="text-muted small mb-3">{{ calisan.email|default:"E-posta belirtilmemiş" }}</p>
-                <div class="d-flex justify-content-around border-top pt-3">
-                    <div class="text-center">
-                        <div class="fw-bold">{{ calisan.task_set.count }}</div>
-                        <small class="text-muted">İş</small>
-                    </div>
-                    <div class="text-center">
-                        <div class="fw-bold">{% if calisan.is_superuser %}Admin{% else %}Çalışan{% endif %}</div>
-                        <small class="text-muted">Rol</small>
-                    </div>
+
+                <h5 class="fw-bold mb-1 text-dark">{{ emp.username }}</h5>
+                <p class="text-muted small mb-3">
+                    <i class="fa-solid fa-envelope me-1"></i>{{ emp.email|default:"E-posta girilmemiş" }}
+                </p>
+
+                <div class="mb-4">
+                    <span class="badge bg-primary bg-opacity-10 text-primary rounded-pill px-3 py-2">
+                        <i class="fa-solid fa-briefcase me-1 small"></i>
+                        {{ emp.base_role.role_name|default:"Saha Çalışanı" }}
+                    </span>
+                </div>
+
+                <div class="d-flex justify-content-center gap-2 border-top pt-3">
+                    <button class="btn btn-sm btn-light border flex-grow-1" title="Düzenle">
+                        <i class="fa-solid fa-user-pen"></i>
+                    </button>
+                    <button class="btn btn-sm btn-light border flex-grow-1 text-primary" title="İşlerini Gör">
+                        <i class="fa-solid fa-list-check"></i>
+                    </button>
+                    <button class="btn btn-sm btn-light border flex-grow-1 text-danger" title="Devre Dışı Bırak">
+                        <i class="fa-solid fa-user-slash"></i>
+                    </button>
                 </div>
             </div>
         </div>
     </div>
+    {% empty %}
+    <div class="col-12">
+        <div class="text-center py-5 bg-white rounded-4 shadow-sm">
+            <i class="fa-solid fa-users-slash fa-4x text-muted mb-3 opacity-25"></i>
+            <h4 class="text-secondary">Sistemde aktif çalışan bulunamadı.</h4>
+            <p class="text-muted">Lütfen yeni bir kullanıcı kaydedin veya mevcut kullanıcıları aktif edin.</p>
+        </div>
+    </div>
     {% endfor %}
 </div>
+
+<style>
+    .employee-card {
+        transition: all 0.3s ease;
+    }
+    .employee-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0,0,0,0.08) !important;
+    }
+    .bg-light {
+        background-color: #f8f9fa !important;
+    }
+</style>
+
+<script>
+    // Bootstrap tooltip'lerini aktifleştir
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+      return new bootstrap.Tooltip(tooltipTriggerEl)
+    })
+</script>
 {% endblock %}

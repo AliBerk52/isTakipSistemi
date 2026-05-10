@@ -1,13 +1,22 @@
 {% extends 'base.html' %}
 
-{% block title %}Yeni Proje Oluştur | İş Takip{% endblock %}
+{% block title %}Yeni Proje | İş Takip{% endblock %}
 
 {% block content %}
 <div class="row justify-content-center">
     <div class="col-lg-8">
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show shadow-sm" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+
         <div class="card border-0 shadow-lg rounded-4">
             <div class="card-header bg-primary text-white p-4 rounded-top-4">
-                <h4 class="mb-0 fw-bold"><i class="fa-solid fa-folder-plus me-2"></i>Yeni Proje Başlat</h4>
+                <h4 class="mb-0 fw-bold"><i class="fa-solid fa-rocket me-2"></i>Yeni Proje Başlat</h4>
             </div>
             <div class="card-body p-5">
                 <form method="POST">
@@ -19,7 +28,7 @@
                     </div>
 
                     <div class="mb-4">
-                        <label class="form-label fw-bold text-dark">Proje Detayları</label>
+                        <label class="form-label fw-bold text-dark">Proje Detayları (Açıklama)</label>
                         <textarea name="aciklama" class="form-control border-2" rows="4" placeholder="Projenin amacını ve kapsamını kısaca açıklayın..."></textarea>
                     </div>
 
@@ -28,24 +37,26 @@
                             <i class="fa-solid fa-user-shield me-1"></i> Proje Sorumlusu (Admin) Seçin
                         </label>
                         <select name="project_admin" class="form-select form-select-lg border-2 shadow-sm" required>
-                            <option value="" disabled selected>Bir çalışan seçin...</option>
-                            {% for user in users %}
-                                <option value="{{ user.id }}">{{ user.username }} ({% if user.base_role %}{{ user.base_role.role_name }}{% else %}Çalışan{% endif %})</option>
+                            <option value="" disabled selected>Lütfen aktif bir çalışan seçin...</option>
+                            {% for emp in employees %}
+                                <option value="{{ emp.id }}">
+                                    {{ emp.username }} — {% if emp.base_role %}{{ emp.base_role.role_name }}{% else %}Personel{% endif %}
+                                </option>
                             {% endfor %}
                         </select>
-                        <div class="form-text text-muted">
-                            <i class="fa-solid fa-circle-info me-1"></i> Seçtiğiniz kişi bu projenin takımını kurmaktan sorumlu olacaktır.
+                        <div class="form-text mt-2 text-muted">
+                            <i class="fa-solid fa-circle-info me-1"></i> Sadece sistemde <b>aktif</b> olan çalışanlar listelenmektedir. Seçtiğiniz kişi bu projenin takımını kurmaktan sorumlu olacaktır.
                         </div>
                     </div>
 
                     <hr class="my-4 opacity-25">
 
                     <div class="d-flex justify-content-between align-items-center">
-                        <a href="{% url 'admin_project_list' %}" class="btn btn-light border fw-bold px-4">
+                        <a href="{% url 'admin_project_list' %}" class="btn btn-light border fw-bold px-4 py-2">
                             <i class="fa-solid fa-xmark me-1"></i> İptal
                         </a>
                         <button type="submit" class="btn btn-primary btn-lg fw-bold px-5 shadow">
-                            <i class="fa-solid fa-check-double me-2"></i> Projeyi Oluştur ve Görevlendir
+                            <i class="fa-solid fa-check-double me-2"></i> Projeyi Oluştur
                         </button>
                     </div>
                 </form>
@@ -57,7 +68,7 @@
 <style>
     .form-control:focus, .form-select:focus {
         border-color: #0d6efd;
-        box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.1);
+        box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.15);
     }
     .card { transition: transform 0.3s; }
 </style>

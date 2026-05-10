@@ -55,7 +55,7 @@ def register_view(request):
             user = form.save()
 
             # En alt seviye rolü otomatik ata
-            worker_role, _ = Role.objects.get_or_create(role_name='Worker')
+            worker_role, _ = Role.objects.get_or_create(role_name='worker')
             user.base_role = worker_role
             user.save()
 
@@ -63,6 +63,7 @@ def register_view(request):
             log_action(user, "Sisteme kayıt oldu")
             login(request, user)
             return redirect('project_list')
+        
 
     return render(request, 'login.html', {'form': form})
 
