@@ -1,0 +1,75 @@
+{% extends 'base.html' %}
+{% block title %}Yeni Görev | {{ project.project_name }}{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-7">
+        <div class="card border-0 shadow-lg rounded-4">
+            <div class="card-header bg-primary text-white p-4 rounded-top-4">
+                <div class="d-flex align-items-center">
+                    <div class="bg-white bg-opacity-20 p-3 rounded-3 me-3">
+                        <i class="fa-solid fa-list-check fa-xl"></i>
+                    </div>
+                    <div>
+                        <h4 class="mb-0 fw-bold">Yeni Görev Oluştur</h4>
+                        <p class="mb-0 small opacity-75">{{ project.project_name }}</p>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body p-5">
+                {% if form.errors %}
+                <div class="alert alert-danger">
+                    {% for field in form %}{% for error in field.errors %}<p class="mb-1">{{ field.label }}: {{ error }}</p>{% endfor %}{% endfor %}
+                    {% for error in form.non_field_errors %}<p class="mb-1">{{ error }}</p>{% endfor %}
+                </div>
+                {% endif %}
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="mb-4">
+                        <label class="form-label fw-bold">Görev Adı</label>
+                        <input type="text" name="task_name" value="{{ form.task_name.value|default:'' }}"
+                            class="form-control form-control-lg border-2" placeholder="Görev adını girin" required>
+                    </div>
+                    <div class="mb-4">
+                        <label class="form-label fw-bold">Açıklama</label>
+                        <textarea name="description" class="form-control border-2" rows="3"
+                            placeholder="Görev detayları...">{{ form.description.value|default:'' }}</textarea>
+                    </div>
+                    <div class="mb-4">
+                        <label class="form-label fw-bold">Atanacak Kişi</label>
+                        <select name="assigned_worker" class="form-select border-2">
+                            <option value="">— Seçiniz —</option>
+                            {% for user in form.assigned_worker.field.queryset %}
+                            <option value="{{ user.pk }}"
+                                {% if form.assigned_worker.value == user.pk|stringformat:"s" %}selected{% endif %}>
+                                {{ user.username }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-4">
+                        <label class="form-label fw-bold">Durum</label>
+                        <select name="status" class="form-select border-2">
+                            <option value="">— Seçiniz —</option>
+                            {% for status in form.status.field.queryset %}
+                            <option value="{{ status.pk }}"
+                                {% if form.status.value == status.pk|stringformat:"s" %}selected{% endif %}>
+                                {{ status.status_name }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <hr class="my-4 opacity-25">
+                    <div class="d-flex justify-content-between">
+                        <a href="/projects/{{ project.pk }}/" class="btn btn-light border fw-bold px-4">
+                            <i class="fa-solid fa-arrow-left me-1"></i> Geri Dön
+                        </a>
+                        <button type="submit" class="btn btn-primary btn-lg fw-bold px-5">
+                            <i class="fa-solid fa-floppy-disk me-2"></i> Görevi Oluştur
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

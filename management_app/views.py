@@ -319,7 +319,7 @@ def task_create_view(request, project_pk: int):
         messages.success(request, "Görev oluşturuldu.")
         return redirect('project_detail', pk=project_pk)
 
-    return render(request, 'islerim.html', {'form': form, 'project': project, 'action': 'Oluştur'})
+    return render(request, 'gorevOlustur.html', {'form': form, 'project': project, 'action': 'Oluştur'})
 
 
 @login_required
