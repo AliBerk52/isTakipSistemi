@@ -415,11 +415,12 @@ def comment_delete_view(request, pk: int):
 @login_required
 @role_required(['Admin'])
 def admin_dashboard_view(request):
+    projects = Project.objects.prefetch_related('members').order_by('-start_date')
     context = {
+        'all_projects': projects,
         'user_count': User.objects.count(),
         'active_user_count': User.objects.filter(is_active=True).count(),
-        'project_count': Project.objects.count(),
-        'active_project_count': Project.objects.filter(is_active=True).count(),
+        'project_count': projects.count(),
         'task_count': Task.objects.count(),
         'recent_logs': ActionLog.objects.select_related('user').order_by('-timestamp')[:20],
     }

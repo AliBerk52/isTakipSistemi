@@ -60,6 +60,14 @@ class Project(models.Model):
     def __str__(self):
         return self.project_name
 
+    @property
+    def project_admin(self):
+        """Project Manager rolündeki ilk üyeyi döner."""
+        member = self.members.filter(
+            role_in_project__role_name='Project Manager'
+        ).select_related('user').first()
+        return member.user if member else None
+
 class ProjectMember(models.Model):
     project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name='members')
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='project_assignments')
