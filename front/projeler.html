@@ -1,37 +1,56 @@
 {% extends 'base.html' %}
 
-{% block title %}Projelerim - İş Takip Pro{% endblock %}
-{% block page_title %}Projelerim{% endblock %}
+{% block title %}Projeler | İş Takip{% endblock %}
+{% block page_title %}Devam Eden Projeler{% endblock %}
 
 {% block content %}
-<div class="page-header">
-    <h1>Dahil Olduğum Projeler</h1>
-    {% if request.user.base_role.role_name == 'Project Manager' %}
-        <a href="{% url 'project_create' %}" class="btn btn-primary" style="text-decoration: none;"><i class="fa-solid fa-plus"></i> Yeni Proje Ekle</a>
-    {% endif %}
-</div>
+<div class="row g-4">
+    {% for proje in projeler %}
+    <div class="col-md-6 col-lg-4">
+        <div class="card border-0 shadow-sm rounded-4 h-100">
+            <div class="card-body p-4">
+                <div class="d-flex justify-content-between mb-3">
+                    <span class="badge bg-primary bg-opacity-10 text-primary px-2 py-1"><i class="fa-solid fa-tag me-1"></i> {{ proje.kategori|default:"Yazılım" }}</span>
+                    <small class="text-muted"><i class="fa-regular fa-calendar me-1"></i>Bitiş: {{ proje.bitis_tarihi|date:"d M Y"|default:"Belirtilmedi" }}</small>
+                </div>
+                <h5 class="fw-bold mb-2">{{ proje.isim }}</h5>
+                <p class="text-muted small mb-4">{{ proje.aciklama|truncatewords:15 }}</p>
+                
+                <div class="mb-3">
+                    <div class="d-flex justify-content-between small mb-1">
+                        <span class="fw-semibold">İlerleme</span>
+                        <span class="fw-bold text-success">%{{ proje.ilerleme|default:"0" }}</span>
+                    </div>
+                    <div class="progress" style="height: 8px;">
+                        <div class="progress-bar custom-progress bg-success rounded-pill" data-width="{{ proje.ilerleme|default:'0' }}"></div>
+                    </div>
+                </div>
 
-<div class="card-grid">
-    {% for pm in memberships %}
-        <div class="card" style="border-left: 4px solid var(--primary-color);">
-            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 10px;">
-                <h3 class="card-title" style="margin: 0;">{{ pm.project.project_name }}</h3>
-                <span class="badge {% if pm.project.is_active %}badge-success{% else %}badge-warning{% endif %}">
-                    {% if pm.project.is_active %}Aktif{% else %}Pasif{% endif %}
-                </span>
-            </div>
-            <p class="card-desc">Rolüm: <strong>{{ pm.role_in_project.role_name|default:"Belirtilmemiş" }}</strong></p>
-            
-            <div style="margin-top: 15px;">
-                <a href="{% url 'project_detail' pm.project.pk %}" class="btn btn-primary" style="display: block; text-align: center; text-decoration: none;">Proje Arayüzüne Git</a>
+                <div class="d-grid mt-4">
+                    <a href="#" class="btn btn-light border text-primary fw-bold">Detaylara Git <i class="fa-solid fa-arrow-right ms-1"></i></a>
+                </div>
             </div>
         </div>
+    </div>
     {% empty %}
-         <div class="card" style="grid-column: 1 / -1; text-align: center; padding: 40px;">
-            <i class="fa-solid fa-folder-open" style="font-size: 3rem; color: #ccc; margin-bottom: 15px;"></i>
-            <h3>Henüz bir projeye dahil değilsiniz.</h3>
-            <p style="color: var(--text-muted);">Yöneticinizin sizi bir takıma eklemesini bekleyin.</p>
-        </div>
+    <div class="col-12 text-center py-5">
+        <i class="fa-solid fa-box-open fa-4x text-muted mb-3"></i>
+        <h4 class="text-secondary">Sistemde hiç proje bulunmuyor.</h4>
+        {% if user.is_superuser %}
+        <a href="{% url 'projeOlustur' %}" class="btn btn-primary mt-3"><i class="fa-solid fa-plus me-2"></i>Yeni Proje Oluştur</a>
+        {% endif %}
+    </div>
     {% endfor %}
 </div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        document.querySelectorAll('.custom-progress').forEach(function(bar) {
+            var width = bar.getAttribute('data-width');
+            if(width) {
+                bar.style.width = width + '%';
+            }
+        });
+    });
+</script>
 {% endblock %}

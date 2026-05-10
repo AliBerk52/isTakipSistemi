@@ -1,36 +1,83 @@
-<!DOCTYPE html>
-<html lang="tr">
-<head>
-    <meta charset="UTF-8">
-    <title>İş Panosu</title>
-    {% load static %}
-    <link rel="stylesheet" href="{% static 'css/style.css' %}">
-</head>
-<body>
-    <nav class="sidebar">
-        <h2>Proje Admini</h2>
-        <a href="/admin-panel/projects/" class="nav-link">Projelerim</a>
-        <a href="/admin-panel/projects/" class="nav-link">Takım Yönetimi</a>
-        <a href="/" class="nav-link active">Görev Panosu</a>
-    </nav>
-    <main class="main">
-        <div class="header">
-            <h1>Görev Panosu (Kanban)</h1>
-            <button class="btn">+ Görev Ata</button>
-        </div>
-        <div class="pano-container">
-            <div class="column">
-                <h4>YAPILACAK</h4>
-                <div class="task">Veritabanı Tasarımı <br><small>Ali Berk</small></div>
-            </div>
-            <div class="column">
-                <h4>DEVAM EDİYOR</h4>
-                <div class="task" style="border-left: 4px solid var(--warning);">API Entegrasyonu <br><small>Ayşe Kaya</small></div>
-            </div>
-            <div class="column">
-                <h4>BİTTİ</h4>
+{% extends 'base.html' %}
+
+{% block title %}Pano | İş Takip{% endblock %}
+{% block page_title %}Gösterge Panosu{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-4">
+        <div class="card bg-primary text-white border-0 shadow-sm rounded-4 h-100">
+            <div class="card-body d-flex align-items-center justify-content-between p-4">
+                <div>
+                    <h6 class="text-uppercase fw-semibold mb-1">Aktif Projeler</h6>
+                    <h2 class="fw-bold mb-0">{{ projeler.count|default:"0" }}</h2>
+                </div>
+                <i class="fa-solid fa-briefcase fa-3x opacity-50"></i>
             </div>
         </div>
-    </main>
-</body>
-</html>
+    </div>
+    <div class="col-md-4">
+        <div class="card bg-warning text-dark border-0 shadow-sm rounded-4 h-100">
+            <div class="card-body d-flex align-items-center justify-content-between p-4">
+                <div>
+                    <h6 class="text-uppercase fw-semibold mb-1">Bekleyen İşlerim</h6>
+                    <h2 class="fw-bold mb-0">{{ bekleyen_is_sayisi|default:"0" }}</h2>
+                </div>
+                <i class="fa-solid fa-hourglass-half fa-3x opacity-50"></i>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card bg-success text-white border-0 shadow-sm rounded-4 h-100">
+            <div class="card-body d-flex align-items-center justify-content-between p-4">
+                <div>
+                    <h6 class="text-uppercase fw-semibold mb-1">Tamamlanan İşler</h6>
+                    <h2 class="fw-bold mb-0">{{ tamamlanan_is_sayisi|default:"0" }}</h2>
+                </div>
+                <i class="fa-solid fa-check-double fa-3x opacity-50"></i>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card border-0 shadow-sm rounded-4">
+    <div class="card-header bg-white border-bottom py-3 d-flex justify-content-between align-items-center">
+        <h5 class="mb-0 fw-bold"><i class="fa-solid fa-clock-rotate-left text-primary me-2"></i>Son Atanan İşler</h5>
+        <a href="{% url 'islerim' %}" class="btn btn-sm btn-outline-primary">Tümünü Gör</a>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light text-secondary">
+                    <tr>
+                        <th class="ps-4">İş Tanımı</th>
+                        <th>Proje</th>
+                        <th>Öncelik</th>
+                        <th>Durum</th>
+                        <th class="text-end pe-4">İşlem</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for is in son_isler %}
+                    <tr>
+                        <td class="ps-4 fw-medium">{{ is.baslik }}</td>
+                        <td>{{ is.proje.isim }}</td>
+                        <td><span class="badge bg-danger">{{ is.oncelik }}</span></td>
+                        <td><span class="badge bg-warning text-dark">{{ is.durum }}</span></td>
+                        <td class="text-end pe-4">
+                            <a href="#" class="btn btn-sm btn-light border"><i class="fa-solid fa-eye"></i> İncele</a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5" class="text-center py-4 text-muted">
+                            <i class="fa-solid fa-folder-open fa-2x mb-2"></i><br>Henüz size atanmış bir iş bulunmuyor.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

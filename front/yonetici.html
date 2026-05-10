@@ -1,59 +1,74 @@
 {% extends 'base.html' %}
 
-{% block title %}Yönetici Paneli - İş Takip Pro{% endblock %}
-{% block page_title %}Yönetici Özeti{% endblock %}
-
 {% block content %}
-<div class="page-header">
-    <h1>Sistem Durumu</h1>
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="fw-bold"><i class="fa-solid fa-user-shield text-primary me-2"></i>Yönetici Kontrol Paneli</h2>
+    <a href="{% url 'projeOlustur' %}" class="btn btn-primary"><i class="fa-solid fa-plus me-2"></i>Yeni Proje</a>
 </div>
 
-<div class="card-grid">
-    <div class="card">
-        <h3 class="card-title">👥 Kullanıcı İstatistikleri</h3>
-        <p>Toplam Kullanıcı: <strong>{{ user_count }}</strong></p>
-        <p>Aktif Kullanıcı: <strong style="color: var(--success);">{{ active_user_count }}</strong></p>
-        <a href="{% url 'admin_user_list' %}" class="btn btn-primary" style="display: inline-block; margin-top: 10px; text-decoration: none;">Kullanıcıları Yönet</a>
-    </div>
-
-    <div class="card">
-        <h3 class="card-title">📁 Proje İstatistikleri</h3>
-        <p>Toplam Proje: <strong>{{ project_count }}</strong></p>
-        <p>Aktif Proje: <strong style="color: var(--success);">{{ active_project_count }}</strong></p>
-         <a href="{% url 'admin_project_list' %}" class="btn btn-primary" style="display: inline-block; margin-top: 10px; text-decoration: none;">Projeleri Yönet</a>
-    </div>
-
-    <div class="card">
-        <h3 class="card-title">📋 Görev İstatistikleri</h3>
-        <p>Toplam Görev: <strong>{{ task_count }}</strong></p>
-    </div>
-</div>
-
-<div style="margin-top: 30px;">
-    <h2>Son Aktiviteler (Loglar)</h2>
-    <div class="card" style="margin-top: 15px;">
-        <table style="width: 100%; border-collapse: collapse;">
-            <thead>
-                <tr style="border-bottom: 2px solid var(--border-color); text-align: left;">
-                    <th style="padding: 10px;">Tarih</th>
-                    <th style="padding: 10px;">Kullanıcı</th>
-                    <th style="padding: 10px;">Aksiyon</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for log in recent_logs %}
-                    <tr style="border-bottom: 1px solid var(--border-color);">
-                        <td style="padding: 10px; color: var(--text-muted); font-size: 0.9rem;">{{ log.timestamp|date:"d M Y H:i" }}</td>
-                        <td style="padding: 10px;"><strong>{{ log.user.username|default:"Sistem" }}</strong></td>
-                        <td style="padding: 10px;">{{ log.action }}</td>
+<div class="card border-0 shadow-sm rounded-4">
+    <div class="card-body">
+        <h5 class="fw-bold mb-4">Tüm Projeler ve Ekipler</h5>
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th>Proje Adı</th>
+                        <th>Proje Admini</th>
+                        <th>Çalışan Ekibi</th>
+                        <th>Durum</th>
+                        <th class="text-end">İşlemler</th>
                     </tr>
-                {% empty %}
-                    <tr><td colspan="3" style="padding: 10px; text-align: center;">Henüz log kaydı yok.</td></tr>
-                {% endfor %}
-            </tbody>
-        </table>
-        <div style="margin-top: 15px; text-align: center;">
-            <a href="{% url 'admin_log' %}" class="btn" style="background-color: #e2e8f0; color: #333; text-decoration: none;">Tüm Logları Gör</a>
+                </thead>
+                <tbody>
+                    {% for proje in all_projects %}
+                    <tr>
+                        <td class="fw-bold">{{ proje.isim }}</td>
+                        <td>
+                            {% if proje.admin %}
+                                <span class="badge bg-info text-dark"><i class="fa-solid fa-star me-1"></i>{{ proje.admin.username }}</span>
+                            {% else %}
+                                <button class="btn btn-sm btn-outline-warning" data-bs-toggle="modal" data-bs-target="#assignModal{{ proje.id }}">Admin Ata</button>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div class="avatar-group d-flex">
+                                {% for calisan in proje.members.all %}
+                                    <span class="badge bg-secondary me-1" title="{{ calisan.username }}">{{ calisan.username|slice:":1"|upper }}</span>
+                                {% empty %}
+                                    <small class="text-muted">Henüz kimse yok</small>
+                                {% endfor %}
+                            </div>
+                        </td>
+                        <td><span class="badge bg-success">Aktif</span></td>
+                        <td class="text-end">
+                            <a href="#" class="btn btn-sm btn-light border"><i class="fa-solid fa-edit"></i></a>
+                            <a href="#" class="btn btn-sm btn-light border text-danger"><i class="fa-solid fa-trash"></i></a>
+                        </td>
+                    </tr>
+
+                    <div class="modal fade" id="assignModal{{ proje.id }}" tabindex="-1">
+                        <div class="modal-dialog">
+                            <form method="POST" action="#"> {% csrf_token %}
+                                <div class="modal-content">
+                                    <div class="modal-header"><h5>Proje Admini Seç</h5></div>
+                                    <div class="modal-body">
+                                        <select name="new_admin" class="form-select">
+                                            {% for user in all_users %}
+                                                <option value="{{ user.id }}">{{ user.username }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="submit" class="btn btn-primary">Atamayı Onayla</button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </tbody>
+            </table>
         </div>
     </div>
 </div>
