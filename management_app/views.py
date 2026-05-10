@@ -204,6 +204,10 @@ def project_list_view(request):
 def project_create_view(request):
     form = ProjectForm(request.POST or None)
     if request.method == 'POST' and form.is_valid():
+        project = form.save(commit=False)
+        if not project.start_date:
+            from django.utils import timezone
+            project.start_date = timezone.now().date()
         project = form.save()
 
         # Seçilen proje sorumlusunu ekle

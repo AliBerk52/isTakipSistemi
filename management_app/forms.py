@@ -19,6 +19,10 @@ class ProjectForm(forms.ModelForm):
             'start_date': forms.DateInput(attrs={'type': 'date'}),
             'end_date': forms.DateInput(attrs={'type': 'date'}),
         }
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['start_date'].required = False  # template'de yok, modelde default var
+        self.fields['end_date'].required = False
 
 class TaskForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
