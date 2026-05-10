@@ -1,76 +1,138 @@
 {% extends 'base.html' %}
 
+{% block title %}Yönetici Paneli | İş Takip Sistemi{% endblock %}
+
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-4">
-    <h2 class="fw-bold"><i class="fa-solid fa-user-shield text-primary me-2"></i>Yönetici Kontrol Paneli</h2>
-    <a href="{% url 'project_create' %}" class="btn btn-primary"><i class="fa-solid fa-plus me-2"></i>Yeni Proje</a>
+    <div>
+        <h2 class="fw-bold text-dark mb-1">
+            <i class="fa-solid fa-user-shield text-primary me-2"></i>Yönetici Kontrol Paneli
+        </h2>
+        <p class="text-muted mb-0">Tüm projeleri yönetebilir, sorumluları değiştirebilir veya projeleri silebilirsiniz.</p>
+    </div>
+    <a href="{% url 'project_create' %}" class="btn btn-primary btn-lg shadow-sm fw-bold">
+        <i class="fa-solid fa-plus me-2"></i>Yeni Proje Başlat
+    </a>
 </div>
 
 <div class="card border-0 shadow-sm rounded-4">
-    <div class="card-body">
-        <h5 class="fw-bold mb-4">Tüm Projeler ve Ekipler</h5>
+    <div class="card-header bg-white py-3 border-bottom-0">
+        <h5 class="mb-0 fw-bold text-secondary">Mevcut Projeler ve Durumları</h5>
+    </div>
+    <div class="card-body p-0">
         <div class="table-responsive">
-            <table class="table table-hover align-middle">
+            <table class="table table-hover align-middle mb-0">
                 <thead class="table-light">
                     <tr>
-                        <th>Proje Adı</th>
-                        <th>Proje Admini</th>
-                        <th>Çalışan Ekibi</th>
+                        <th class="ps-4">Proje Adı</th>
+                        <th>Proje Sorumlusu (Admin)</th>
+                        <th>Ekip Üyeleri</th>
                         <th>Durum</th>
-                        <th class="text-end">İşlemler</th>
+                        <th class="text-end pe-4">İşlemler</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for proje in all_projects %}
                     <tr>
-                        <td class="fw-bold">{{ proje.isim|default:proje.name }}</td>
+                        <td class="ps-4">
+                            <div class="fw-bold text-dark">{{ proje.isim|default:proje.name }}</div>
+                            <small class="text-muted">{{ proje.created_at|date:"d M Y"|default:"Tarih yok" }}</small>
+                        </td>
+
                         <td>
-                            {% if proje.admin %}
-                                <span class="badge bg-info text-dark"><i class="fa-solid fa-star me-1"></i>{{ proje.admin.username }}</span>
+                            {% if proje.project_admin %}
+                                <div class="d-flex align-items-center">
+                                    <div class="bg-info bg-opacity-10 text-info rounded-circle p-2 me-2">
+                                        <i class="fa-solid fa-user-tie"></i>
+                                    </div>
+                                    <span class="fw-medium text-dark">{{ proje.project_admin.username }}</span>
+                                </div>
                             {% else %}
-                                <button class="btn btn-sm btn-outline-warning" data-bs-toggle="modal" data-bs-target="#assignModal{{ proje.id }}">Admin Ata</button>
+                                <span class="badge bg-warning text-dark px-3 py-2">
+                                    <i class="fa-solid fa-triangle-exclamation me-1"></i>Admin Atanmadı
+                                </span>
                             {% endif %}
                         </td>
+
                         <td>
-                            <div class="avatar-group d-flex">
-                                {% for calisan in proje.members.all %}
-                                    <span class="badge bg-secondary me-1" title="{{ calisan.username }}">{{ calisan.username|slice:":1"|upper }}</span>
-                                {% empty %}
-                                    <small class="text-muted">Henüz kimse yok</small>
+                            <div class="d-flex">
+                                {% for member in proje.members.all|slice:":3" %}
+                                    <div class="bg-secondary bg-opacity-25 rounded-circle d-flex align-items-center justify-content-center text-dark small fw-bold border border-white" 
+                                         style="width: 32px; height: 32px; margin-left: -8px;" title="{{ member.username }}">
+                                        {{ member.username|slice:":1"|upper }}
+                                    </div>
                                 {% endfor %}
+                                {% if proje.members.count > 3 %}
+                                    <div class="ms-2 small text-muted align-self-center">+{{ proje.members.count|add:"-3" }} kişi</div>
+                                {% endif %}
                             </div>
                         </td>
-                        <td><span class="badge bg-success">Aktif</span></td>
-                        <td class="text-end">
-                            <a href="#" class="btn btn-sm btn-light border"><i class="fa-solid fa-edit"></i></a>
-                            <a href="#" class="btn btn-sm btn-light border text-danger"><i class="fa-solid fa-trash"></i></a>
+
+                        <td>
+                            <span class="badge rounded-pill bg-success px-3">Aktif</span>
+                        </td>
+
+                        <td class="text-end pe-4">
+                            <div class="btn-group shadow-sm">
+                                <a href="{% url 'project_update' proje.id %}" class="btn btn-sm btn-light border" title="Düzenle">
+                                    <i class="fa-solid fa-pen-to-square text-primary"></i>
+                                </a>
+                                <button type="button" class="btn btn-sm btn-light border text-danger" 
+                                        data-bs-toggle="modal" data-bs-target="#deleteModal{{ proje.id }}" title="Projeyi Sil">
+                                    <i class="fa-solid fa-trash-can"></i>
+                                </button>
+                            </div>
                         </td>
                     </tr>
 
-                    <div class="modal fade" id="assignModal{{ proje.id }}" tabindex="-1">
-                        <div class="modal-dialog">
-                            <form method="POST" action="#">
-                                {% csrf_token %}
-                                <div class="modal-content">
-                                    <div class="modal-header"><h5>Proje Admini Seç</h5></div>
-                                    <div class="modal-body">
-                                        <select name="new_admin" class="form-select">
-                                            {% for user in all_users %}
-                                                <option value="{{ user.id }}">{{ user.username }}</option>
-                                            {% endfor %}
-                                        </select>
+                    <div class="modal fade" id="deleteModal{{ proje.id }}" tabindex="-1" aria-hidden="true">
+                        <div class="modal-dialog modal-dialog-centered">
+                            <div class="modal-content border-0 shadow">
+                                <div class="modal-body text-center p-5">
+                                    <div class="text-danger mb-4">
+                                        <i class="fa-solid fa-circle-exclamation fa-4x"></i>
                                     </div>
-                                    <div class="modal-footer">
-                                        <button type="submit" class="btn btn-primary">Atamayı Onayla</button>
+                                    <h4 class="fw-bold mb-3">Projeyi Silmek İstiyor musunuz?</h4>
+                                    <p class="text-muted">
+                                        "<strong>{{ proje.isim|default:proje.name }}</strong>" projesi ve bu projeye bağlı tüm görevler kalıcı olarak silinecektir.
+                                    </p>
+                                    <div class="d-flex justify-content-center gap-3 mt-4">
+                                        <button type="button" class="btn btn-light border px-4 py-2 fw-bold" data-bs-dismiss="modal">Vazgeç</button>
+                                        <form method="POST" action="{% url 'project_delete' proje.id %}">
+                                            {% csrf_token %}
+                                            <button type="submit" class="btn btn-danger px-4 py-2 fw-bold">
+                                                <i class="fa-solid fa-trash-can me-1"></i> Evet, Kalıcı Olarak Sil
+                                            </button>
+                                        </form>
                                     </div>
                                 </div>
-                            </form>
+                            </div>
                         </div>
                     </div>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5" class="text-center py-5 text-muted">
+                            <i class="fa-solid fa-folder-open fa-3x mb-3 opacity-25"></i>
+                            <p class="mb-0">Henüz kayıtlı bir proje bulunmuyor.</p>
+                        </td>
+                    </tr>
                     {% endfor %}
                 </tbody>
             </table>
         </div>
     </div>
 </div>
+
+<style>
+    .table-hover tbody tr:hover {
+        background-color: rgba(13, 110, 253, 0.02);
+    }
+    .btn-group .btn:hover {
+        background-color: #f8f9fa;
+        z-index: 2;
+    }
+    .modal-content {
+        border-radius: 1.5rem;
+    }
+</style>
 {% endblock %}
