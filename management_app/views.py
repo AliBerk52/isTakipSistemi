@@ -53,17 +53,30 @@ def register_view(request):
     if request.method == 'POST':
         if form.is_valid():
             user = form.save()
+
+            # En alt seviye rolü otomatik ata
+            worker_role, _ = Role.objects.get_or_create(role_name='Worker')
+            user.base_role = worker_role
+            user.save()
+
             UserProfile.objects.create(user=user)
             log_action(user, "Sisteme kayıt oldu")
             login(request, user)
-            return redirect('dashboard')
+            return redirect('project_list')
 
     return render(request, 'login.html', {'form': form})
 
 
 def login_view(request):
     if request.user.is_authenticated:
-        return redirect('dashboard')
+        role_name = User.base_role.role_name if User.base_role else None
+
+        if role_name == 'Admin':
+            return redirect('admin_dashboard')
+        elif role_name == 'Project Manager':
+            return redirect('admin_project_list')
+        else:
+            return redirect('project_list')
 
     form = LoginForm(request.POST or None)
 
