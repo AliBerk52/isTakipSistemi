@@ -58,7 +58,7 @@
         <i class="fa-solid fa-box-open fa-4x text-muted mb-3"></i>
         <h4 class="text-secondary">Sistemde hiç proje bulunmuyor.</h4>
         {% if user.is_superuser %}
-        <a href="{% url 'projeOlustur' %}" class="btn btn-primary mt-3"><i class="fa-solid fa-plus me-2"></i>Yeni Proje Oluştur</a>
+        <a href="{% url 'project_create' %}"> class="btn btn-primary mt-3"><i class="fa-solid fa-plus me-2"></i>Yeni Proje Oluştur</a>
         {% endif %}
     </div>
     {% endfor %}
