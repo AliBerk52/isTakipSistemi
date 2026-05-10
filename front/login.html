@@ -223,18 +223,25 @@
             </form>
         </div>
 
-        <div class="form-container sign-in-container">
-            <form action="/login/" method="post">
-            {% csrf_token %}
-                <div class="logo-text">🚀 İş Takip Pro</div>
-                <h1>Giriş Yap</h1>
-                <span>Hesabınıza erişmek için bilgilerinizi girin</span>
-                <input type="text" name="username" placeholder="Kullanıcı Adı" required />
-                <input type="password" name="password" placeholder="Şifre" required />
-                <a href="/sifremi-unuttum/">Şifrenizi mi unuttunuz?</a>
-                <button type="submit">Giriş Yap</button>
-            </form>
+       <div class="form-container sign-in-container">
+        <form action="/login/" method="post">
+        {% csrf_token %}
+        <div class="logo-text">🚀 İş Takip Pro</div>
+        <h1>Giriş Yap</h1>
+        <span>Hesabınıza erişmek için bilgilerinizi girin</span>
+        
+        <input type="text" name="username" placeholder="Kullanıcı Adı" required />
+        <input type="password" name="password" placeholder="Şifre" required />
+        
+        <div style="text-align: right; width: 100%; margin-bottom: 15px;">
+            <a href="{% url 'password_reset' %}" style="font-size: 13px; color: #666; text-decoration: none; font-weight: bold;">
+                Şifrenizi mi unuttunuz?
+            </a>
         </div>
+        
+        <button type="submit">Giriş Yap</button>
+        </form>
+        </div>  
 
         <div class="overlay-container">
             <div class="overlay">

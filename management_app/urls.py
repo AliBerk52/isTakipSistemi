@@ -1,4 +1,5 @@
 from django.urls import path
+from django.contrib.auth import views as auth_views # E-posta ve şifre sıfırlama için eklendi
 from . import views
 
 urlpatterns = [
@@ -10,10 +11,23 @@ urlpatterns = [
     path('logout/', views.logout_view, name='logout'),
 
     # -------------------------------------------------------
-    # AUTH — Şifre Sıfırlama
+    # AUTH — Şifre Sıfırlama (Django Hazır Sistemine Geçirildi)
     # -------------------------------------------------------
-    path('sifremi-unuttum/', views.password_reset_request_view, name='password_reset_request'),
-    path('sifre-sifirla/<str:token>/', views.password_reset_confirm_view, name='password_reset_confirm'),
+    path('sifremi-unuttum/', 
+         auth_views.PasswordResetView.as_view(template_name='password_reset_form.html'), 
+         name='password_reset'),
+         
+    path('sifremi-unuttum/mail-gonderildi/', 
+         auth_views.PasswordResetDoneView.as_view(template_name='password_reset_done.html'), 
+         name='password_reset_done'),
+         
+    path('sifre-sifirla/<uidb64>/<token>/', 
+         auth_views.PasswordResetConfirmView.as_view(template_name='password_reset_confirm.html'), 
+         name='password_reset_confirm'),
+         
+    path('sifre-sifirla/basarili/', 
+         auth_views.PasswordResetCompleteView.as_view(template_name='password_reset_complete.html'), 
+         name='password_reset_complete'),
 
     # -------------------------------------------------------
     # DASHBOARD (Ana Sayfa)

@@ -91,3 +91,11 @@ AUTH_USER_MODEL = 'management_app.User'
 LOGIN_URL = 'login'
 LOGIN_REDIRECT_URL = 'dashboard'
 LOGOUT_REDIRECT_URL = 'login'
+
+
+
+# E-Posta ayarlarını dış dosyadan çekiyoruz
+try:
+    from .email_settings import *
+except ImportError:
+    print("Uyarı: email_settings.py dosyası bulunamadı!")
