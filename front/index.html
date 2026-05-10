@@ -1,8 +1,5 @@
 {% extends 'base.html' %}
-
 {% block title %}Pano | İş Takip Sistemi{% endblock %}
-{% block page_title %}Genel Durum Panosu{% endblock %}
-
 {% block content %}
 <div class="row g-4 mb-4">
     <div class="col-md-6 col-xl-3">
@@ -10,7 +7,7 @@
             <div class="card-body">
                 <div class="d-flex align-items-center justify-content-between">
                     <div>
-                        <h6 class="text-muted mb-1 small uppercase fw-bold">Dahil Olduğum Projeler</h6>
+                        <h6 class="text-muted mb-1 small fw-bold">Dahil Olduğum Projeler</h6>
                         <h2 class="mb-0 fw-bold">{{ my_projects.count|default:"0" }}</h2>
                     </div>
                     <div class="bg-primary bg-opacity-10 text-primary p-3 rounded-4">
@@ -20,14 +17,13 @@
             </div>
         </div>
     </div>
-
     <div class="col-md-6 col-xl-3">
         <div class="card border-0 shadow-sm rounded-4 h-100">
             <div class="card-body">
                 <div class="d-flex align-items-center justify-content-between">
                     <div>
-                        <h6 class="text-muted mb-1 small uppercase fw-bold">Aktif Görevlerim</h6>
-                        <h2 class="mb-0 fw-bold">{{ my_tasks.count|default:"0" }}</h2>
+                        <h6 class="text-muted mb-1 small fw-bold">Aktif Görevlerim</h6>
+                        <h2 class="mb-0 fw-bold">{{ bekleyen_is_sayisi|default:"0" }}</h2>
                     </div>
                     <div class="bg-warning bg-opacity-10 text-warning p-3 rounded-4">
                         <i class="fa-solid fa-list-check fa-2x"></i>
@@ -36,14 +32,13 @@
             </div>
         </div>
     </div>
-
     <div class="col-md-6 col-xl-3">
         <div class="card border-0 shadow-sm rounded-4 h-100">
             <div class="card-body">
                 <div class="d-flex align-items-center justify-content-between">
                     <div>
-                        <h6 class="text-muted mb-1 small uppercase fw-bold">Tamamlanan İşler</h6>
-                        <h2 class="mb-0 fw-bold">0</h2>
+                        <h6 class="text-muted mb-1 small fw-bold">Tamamlanan İşler</h6>
+                        <h2 class="mb-0 fw-bold">{{ tamamlanan_is_sayisi|default:"0" }}</h2>
                     </div>
                     <div class="bg-success bg-opacity-10 text-success p-3 rounded-4">
                         <i class="fa-solid fa-circle-check fa-2x"></i>
@@ -52,14 +47,13 @@
             </div>
         </div>
     </div>
-
     <div class="col-md-6 col-xl-3">
-        {% if user.is_superuser or user.admin_projects.exists %}
+        {% if user.is_superuser or user.base_role.role_name == 'Admin' %}
         <div class="card border-0 shadow-sm rounded-4 h-100 bg-dark text-white">
             <div class="card-body d-flex flex-column justify-content-center align-items-center text-center p-3">
                 <p class="mb-2 small opacity-75">Proje yöneticisi yetkiniz var.</p>
-                <a href="{% url 'project_list' %}" class="btn btn-primary w-100 fw-bold rounded-3">
-                    <i class="fa-solid fa-plus me-1"></i> Yeni Görev Ekle
+                <a href="{% url 'project_create' %}" class="btn btn-primary w-100 fw-bold rounded-3">
+                    <i class="fa-solid fa-plus me-1"></i> Yeni Proje Başlat
                 </a>
             </div>
         </div>
@@ -94,13 +88,21 @@
                             {% for is in my_tasks %}
                             <tr>
                                 <td class="ps-4">
-                                    <div class="fw-bold">{{ is.title }}</div>
+                                    <div class="fw-bold">{{ is.task_name }}</div>
                                 </td>
                                 <td>
-                                    <span class="badge bg-secondary bg-opacity-10 text-secondary">{{ is.project.isim }}</span>
+                                    <span class="badge bg-secondary bg-opacity-10 text-secondary">
+                                        {{ is.project.project_name }}
+                                    </span>
                                 </td>
                                 <td>
-                                    <span class="badge rounded-pill bg-warning text-dark px-3">Devam Ediyor</span>
+                                    <span class="badge rounded-pill px-3
+                                        {% if is.status.status_name == 'Tamamlandı' %}bg-success
+                                        {% elif is.status.status_name == 'Devam Ediyor' %}bg-warning text-dark
+                                        {% elif is.status.status_name == 'Sorun Var' %}bg-danger
+                                        {% else %}bg-secondary{% endif %}">
+                                        {{ is.status.status_name|default:"—" }}
+                                    </span>
                                 </td>
                                 <td class="text-end pe-4">
                                     <a href="{% url 'task_detail' is.id %}" class="btn btn-sm btn-light border rounded-pill">İncele</a>
@@ -108,7 +110,9 @@
                             </tr>
                             {% empty %}
                             <tr>
-                                <td colspan="4" class="text-center py-5 text-muted">Henüz üzerinize atanmış bir iş yok.</td>
+                                <td colspan="4" class="text-center py-5 text-muted">
+                                    Henüz üzerinize atanmış bir iş yok.
+                                </td>
                             </tr>
                             {% endfor %}
                         </tbody>
@@ -124,30 +128,28 @@
                 <h5 class="mb-0 fw-bold text-dark">Dahil Olduğum Projeler</h5>
             </div>
             <div class="card-body">
-                {% for proje in my_projects %}
+                {% for uyelik in my_projects %}
                 <div class="mb-3 p-2 border rounded-3 bg-light bg-opacity-50">
-                    <div class="d-flex justify-content-between align-items-center mb-1">
-                        <span class="fw-bold text-dark">{{ proje.isim }}</span>
-                        {% if proje.project_admin == user %}
-                        <span class="badge bg-info text-dark" style="font-size: 0.7rem;">Sorumlusunuz</span>
-                        {% endif %}
-                    </div>
-                    <div class="progress" style="height: 5px;">
-                        <div class="progress-bar bg-primary" style="width: 25%;"></div>
-                    </div>
+                    <a href="{% url 'project_detail' uyelik.project.pk %}" class="text-decoration-none">
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <span class="fw-bold text-dark">{{ uyelik.project.project_name }}</span>
+                            <span class="badge {% if uyelik.project.is_active %}bg-success{% else %}bg-secondary{% endif %}" style="font-size:0.7rem;">
+                                {% if uyelik.project.is_active %}Aktif{% else %}Pasif{% endif %}
+                            </span>
+                        </div>
+                        <small class="text-muted">{{ uyelik.role_in_project.role_name|default:"Üye" }}</small>
+                    </a>
                 </div>
                 {% empty %}
                 <p class="text-muted small">Herhangi bir projede yer almıyorsunuz.</p>
                 {% endfor %}
-                
-                {% if user.is_superuser %}
+
                 <hr class="text-muted opacity-25">
                 <div class="d-grid">
-                    <a href="{% url 'admin_project_list' %}" class="btn btn-outline-primary btn-sm fw-bold">
-                        <i class="fa-solid fa-list me-1"></i> Tüm Projeleri Yönet
+                    <a href="{% url 'project_list' %}" class="btn btn-outline-primary btn-sm fw-bold">
+                        <i class="fa-solid fa-list me-1"></i> Tüm Projeleri Gör
                     </a>
                 </div>
-                {% endif %}
             </div>
         </div>
     </div>

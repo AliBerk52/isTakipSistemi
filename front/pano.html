@@ -10,7 +10,7 @@
             <div class="card-body d-flex align-items-center justify-content-between p-4">
                 <div>
                     <h6 class="text-uppercase fw-semibold mb-1">Aktif Projeler</h6>
-                    <h2 class="fw-bold mb-0">{{ projeler.count|default:"0" }}</h2>
+                    <h2 class="fw-bold mb-0">{{ my_projects.count|default:"0" }}</h2>
                 </div>
                 <i class="fa-solid fa-briefcase fa-3x opacity-50"></i>
             </div>
@@ -43,7 +43,7 @@
 <div class="card border-0 shadow-sm rounded-4">
     <div class="card-header bg-white border-bottom py-3 d-flex justify-content-between align-items-center">
         <h5 class="mb-0 fw-bold"><i class="fa-solid fa-clock-rotate-left text-primary me-2"></i>Son Atanan İşler</h5>
-        <a href="{% url 'islerim' %}" class="btn btn-sm btn-outline-primary">Tümünü Gör</a>
+        <a href="{% url 'project_list' %}" class="btn btn-sm btn-outline-primary">Tümünü Gör</a>
     </div>
     <div class="card-body p-0">
         <div class="table-responsive">
@@ -60,12 +60,14 @@
                 <tbody>
                     {% for is in son_isler %}
                     <tr>
-                        <td class="ps-4 fw-medium">{{ is.baslik }}</td>
-                        <td>{{ is.proje.isim }}</td>
-                        <td><span class="badge bg-danger">{{ is.oncelik }}</span></td>
-                        <td><span class="badge bg-warning text-dark">{{ is.durum }}</span></td>
+                        <td class="ps-4 fw-medium">{{ is.task_name }}</td>
+                        <td>{{ is.project.project_name }}</td>
+                        <td><span class="badge bg-secondary">—</span></td>  <!-- öncelik yok modelde -->
+                        <td><span class="badge bg-warning text-dark">{{ is.status.status_name|default:"—" }}</span></td>
                         <td class="text-end pe-4">
-                            <a href="#" class="btn btn-sm btn-light border"><i class="fa-solid fa-eye"></i> İncele</a>
+                            <a href="/tasks/{{ is.pk }}/" class="btn btn-sm btn-light border">
+                                <i class="fa-solid fa-eye"></i> İncele
+                            </a>
                         </td>
                     </tr>
                     {% empty %}

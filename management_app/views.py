@@ -1,5 +1,3 @@
-from urllib import request
-
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.decorators import login_required
@@ -55,31 +53,26 @@ def register_view(request):
     if request.method == 'POST':
         if form.is_valid():
             user = form.save()
-
-            # En alt seviye rolü otomatik ata
-            worker_role, _ = Role.objects.get_or_create(role_name='worker')
+            worker_role, _ = Role.objects.get_or_create(role_name='Çalışan')
             user.base_role = worker_role
             user.save()
-
             UserProfile.objects.create(user=user)
             log_action(user, "Sisteme kayıt oldu")
             login(request, user)
             return redirect('project_list')
-        
 
     return render(request, 'login.html', {'form': form})
 
 
 def login_view(request):
     if request.user.is_authenticated:
-        role_name = User.base_role.role_name if User.base_role else None
-
-        if role_name == 'Admin':
+        role_name = request.user.base_role.role_name if request.user.base_role else None
+        if request.user.is_superuser or role_name == 'Admin':
             return redirect('admin_dashboard')
         elif role_name == 'Project Manager':
-            return redirect('admin_project_list')
-        else:
             return redirect('project_list')
+        else:
+            return redirect('dashboard')
 
     form = LoginForm(request.POST or None)
 
@@ -95,19 +88,25 @@ def login_view(request):
         if form.is_valid():
             username = form.cleaned_data['username']
             password = form.cleaned_data['password']
-            # Kutucuğun durumunu doğrudan HTML formundan (POST) okuyoruz:
             remember_me = request.POST.get('remember_me') == 'on'
 
             user = authenticate(request, username=username, password=password)
             if user:
+                cache.delete(cache_key)
                 login(request, user)
-                remember_me = request.POST.get('remember_me') == 'on'
                 if remember_me:
-                   request.session.set_expiry(60 * 60 * 24 * 14)  # 14 gün
+                    request.session.set_expiry(60 * 60 * 24 * 14)
                 else:
                     request.session.set_expiry(0)
                 log_action(user, "Sisteme giriş yaptı")
-                return redirect('dashboard')
+
+                role_name = user.base_role.role_name if user.base_role else None
+                if user.is_superuser or role_name == 'Admin':
+                    return redirect('admin_dashboard')
+                elif role_name == 'Project Manager':
+                    return redirect('project_list')
+                else:
+                    return redirect('dashboard')
             else:
                 cache.set(cache_key, attempts + 1, LOCKOUT_SECONDS)
                 remaining = MAX_LOGIN_ATTEMPTS - (attempts + 1)
@@ -153,7 +152,7 @@ def password_reset_confirm_view(request, token: str):
         messages.error(request, "Geçersiz veya süresi dolmuş bağlantı.")
         return redirect('password_reset_request')
 
-    if timezone.now() - reset_token.createdAt > timedelta(minutes=15):
+    if timezone.now() - reset_token.createdAt > timedelta(hours=24):
         reset_token.delete()
         messages.error(request, "Bağlantının süresi dolmuş.")
         return redirect('password_reset_request')
@@ -183,11 +182,13 @@ def dashboard_view(request):
 
     my_tasks = Task.objects.filter(
         assigned_worker=request.user
-    ).select_related('project', 'status').order_by('-created_at')[:10]
+    ).select_related('project', 'status').order_by('-created_at')
 
     return render(request, 'index.html', {
         'my_projects': my_projects,
         'my_tasks': my_tasks,
+        'tamamlanan_is_sayisi': my_tasks.filter(status__status_name='Tamamlandı').count(),
+        'bekleyen_is_sayisi': my_tasks.exclude(status__status_name='Tamamlandı').count(),
     })
 
 
@@ -197,10 +198,18 @@ def dashboard_view(request):
 
 @login_required
 def project_list_view(request):
-    memberships = ProjectMember.objects.filter(
-        user=request.user
-    ).select_related('project')
-    return render(request, 'projeler.html', {'all_projects': projeler})
+    if request.user.is_staff or (
+        request.user.base_role and
+        request.user.base_role.role_name == 'Admin'
+    ):
+        all_projects = Project.objects.all().order_by('-start_date')
+    else:
+        all_projects = Project.objects.filter(
+            members__user=request.user
+        ).distinct().order_by('-start_date')
+
+    return render(request, 'projeler.html', {'all_projects': all_projects})
+
 
 @login_required
 def project_create_view(request):
@@ -208,24 +217,22 @@ def project_create_view(request):
     if request.method == 'POST' and form.is_valid():
         project = form.save(commit=False)
         if not project.start_date:
-            from django.utils import timezone
             project.start_date = timezone.now().date()
-        project = form.save()
+        project.save()
 
-        # Seçilen proje sorumlusunu ekle
         manager_id = request.POST.get('project_admin')
+        pm_role, _ = Role.objects.get_or_create(role_name='Project Manager')
+        manager = None
         if manager_id:
             manager = User.objects.filter(pk=manager_id).first()
-            pm_role, _ = Role.objects.get_or_create(role_name='Project Manager')
             if manager:
                 ProjectMember.objects.get_or_create(
                     project=project, user=manager,
                     defaults={'role_in_project': pm_role}
                 )
 
-        # Oluşturan kişiyi de ekle (admin ise)
-        if request.user != manager if manager_id else True:
-            admin_role = Role.objects.filter(role_name='Admin').first()
+        admin_role = Role.objects.filter(role_name='Admin').first()
+        if manager != request.user:
             ProjectMember.objects.get_or_create(
                 project=project, user=request.user,
                 defaults={'role_in_project': admin_role}
@@ -235,11 +242,11 @@ def project_create_view(request):
         messages.success(request, "Proje başarıyla oluşturuldu.")
         return redirect('project_detail', pk=project.pk)
 
-    users = User.objects.filter(is_active=True).select_related('base_role').order_by('username')
+    employees = User.objects.filter(is_active=True).select_related('base_role').order_by('username')
     return render(request, 'projeOlustur.html', {
         'form': form,
         'action': 'Yeni Proje Oluştur',
-        'employees': users,
+        'employees': employees,
     })
 
 
@@ -270,22 +277,22 @@ def project_update_view(request, pk: int):
         messages.success(request, "Proje güncellendi.")
         return redirect('project_detail', pk=pk)
 
-    return render(request, 'projeArayuzu.html', {'form': form, 'action': 'Güncelle', 'project': project})
+    return render(request, 'projeOlustur.html', {'form': form, 'action': 'Güncelle', 'project': project})
 
 
 @login_required
-def project_list_view(request):
-    if request.user.is_staff or (
-        request.user.base_role and
-        request.user.base_role.role_name == 'Admin'
-    ):
-        projeler = Project.objects.all().order_by('-start_date')
-    else:
-        projeler = Project.objects.filter(
-            members__user=request.user
-        ).order_by('-start_date')
+def project_delete_view(request, pk: int):
+    project = get_object_or_404(Project, pk=pk)
+    check_project_access(request.user, project)
 
-    return render(request, 'projeler.html', {'projeler': projeler})
+    if request.method == 'POST':
+        name = project.project_name
+        project.delete()
+        log_action(request.user, f"Proje silindi: '{name}'")
+        messages.success(request, "Proje silindi.")
+        return redirect('project_list')
+
+    return render(request, 'projeArayuzu.html', {'project': project})
 
 
 @login_required
@@ -317,11 +324,11 @@ def task_create_view(request, project_pk: int):
         task = form.save(commit=False)
         task.project = project
         task.save()
-        log_action(request.user, f"Görev oluşturuldu: '{task.task_name}' (Proje: {project.project_name})")
+        log_action(request.user, f"Görev oluşturuldu: '{task.task_name}'")
         messages.success(request, "Görev oluşturuldu.")
         return redirect('project_detail', pk=project_pk)
 
-    return render(request, 'gorevOlustur.html', {'form': form, 'project': project, 'action': 'Oluştur'})
+    return render(request, 'gorevOlustur.html', {'form': form, 'project': project})
 
 
 @login_required
@@ -351,7 +358,7 @@ def task_update_view(request, pk: int):
         messages.success(request, "Görev güncellendi.")
         return redirect('task_detail', pk=pk)
 
-    return render(request, 'islerim.html', {'form': form, 'project': task.project, 'action': 'Güncelle', 'task': task})
+    return render(request, 'gorevOlustur.html', {'form': form, 'project': task.project, 'task': task})
 
 
 @login_required
@@ -454,6 +461,48 @@ def admin_user_toggle_view(request, pk: int):
 
 @login_required
 @role_required(['Admin'])
+def admin_user_edit_view(request, pk: int):
+    emp = get_object_or_404(User, pk=pk)
+    roles = Role.objects.all()
+    departments = Department.objects.all()
+
+    if request.method == 'POST':
+        emp.email = request.POST.get('email', emp.email)
+        role_id = request.POST.get('role_id')
+        emp.base_role = Role.objects.filter(pk=role_id).first() if role_id else None
+        dept_id = request.POST.get('department_id')
+        emp.department = Department.objects.filter(pk=dept_id).first() if dept_id else None
+        emp.is_active = request.POST.get('is_active') == '1'
+        emp.save()
+        log_action(request.user, f"Kullanıcı düzenlendi: '{emp.username}'")
+        messages.success(request, f"{emp.username} güncellendi.")
+        return redirect('admin_user_list')
+
+    return render(request, 'kullaniciDuzenle.html', {
+        'emp': emp,
+        'roles': roles,
+        'departments': departments,
+    })
+
+
+@login_required
+@role_required(['Admin'])
+def admin_user_tasks_view(request, pk: int):
+    emp = get_object_or_404(User, pk=pk)
+    tasks = Task.objects.filter(
+        assigned_worker=emp
+    ).select_related('project', 'status').order_by('-created_at')
+    completed_count = tasks.filter(status__status_name='Tamamlandı').count()
+
+    return render(request, 'kullaniciGorevleri.html', {
+        'emp': emp,
+        'tasks': tasks,
+        'completed_count': completed_count,
+    })
+
+
+@login_required
+@role_required(['Admin'])
 def admin_project_list_view(request):
     projects = Project.objects.prefetch_related('members').order_by('-start_date')
     return render(request, 'projeAdmini.html', {'projects': projects})
@@ -470,7 +519,7 @@ def admin_log_view(request):
 @role_required(['Admin'])
 def team_create_view(request, project_pk: int):
     project = get_object_or_404(Project, pk=project_pk)
-    all_users = User.objects.filter().select_related('base_role')
+    all_users = User.objects.filter(is_active=True).select_related('base_role')
     current_members = project.members.values_list('user_id', flat=True)
 
     if request.method == 'POST':
@@ -491,63 +540,4 @@ def team_create_view(request, project_pk: int):
         'all_users': all_users,
         'current_members': current_members,
         'roles': Role.objects.all(),
-    })
-
-@login_required
-def project_delete_view(request, pk: int):
-    project = get_object_or_404(Project, pk=pk)
-    check_project_access(request.user, project)
-
-    if request.method == 'POST':
-        name = project.project_name
-        project.delete()
-        log_action(request.user, f"Proje silindi: '{name}'")
-        messages.success(request, "Proje silindi.")
-        return redirect('project_list')
-
-    return render(request, 'projeArayuzu.html', {'project': project})
-
-
-@login_required
-@role_required(['Admin'])
-def admin_user_edit_view(request, pk: int):
-    emp = get_object_or_404(User, pk=pk)
-    roles = Role.objects.all()
-    departments = Department.objects.all()
-
-    if request.method == 'POST':
-        emp.email = request.POST.get('email', emp.email)
-
-        role_id = request.POST.get('role_id')
-        emp.base_role = Role.objects.filter(pk=role_id).first() if role_id else None
-
-        dept_id = request.POST.get('department_id')
-        emp.department = Department.objects.filter(pk=dept_id).first() if dept_id else None
-
-        emp.is_active = request.POST.get('is_active') == '1'
-        emp.save()
-
-        log_action(request.user, f"Kullanıcı düzenlendi: '{emp.username}'")
-        messages.success(request, f"{emp.username} güncellendi.")
-        return redirect('admin_user_list')
-
-    return render(request, 'kullaniciDuzenle.html', {
-        'emp': emp,
-        'roles': roles,
-        'departments': departments,
-    })
-
-
-def admin_user_tasks_view(request, pk: int):
-    emp = get_object_or_404(User, pk=pk)
-    tasks = Task.objects.filter(
-        assigned_worker=emp
-    ).select_related('project', 'status').order_by('-created_at')
-
-    completed_count = tasks.filter(status__status_name='Tamamlandı').count()
-
-    return render(request, 'kullaniciGorevleri.html', {
-        'emp': emp,
-        'tasks': tasks,
-        'completed_count': completed_count,
     })
