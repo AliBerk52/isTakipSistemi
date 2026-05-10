@@ -76,7 +76,7 @@ WSGI_APPLICATION = 'ana_proje.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'is_takip_db',          # MySQL Workbench'te oluşturduğun şema adı
+        'NAME': 'istakipdb',          # MySQL Workbench'te oluşturduğun şema adı
         'USER': 'istakip',                 # Genelde varsayılan kullanıcı 'root'tur
         'PASSWORD': '123456',  # MySQL kurulumunda şifre belirlediysen buraya yaz (yoksa boş bırak '')
         'HOST': '127.0.0.1',            # Kendi bilgisayarın olduğu için localhost
