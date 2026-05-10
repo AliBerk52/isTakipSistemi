@@ -445,7 +445,7 @@ def admin_log_view(request):
 @role_required(['Admin'])
 def team_create_view(request, project_pk: int):
     project = get_object_or_404(Project, pk=project_pk)
-    all_users = User.objects.filter(is_active=True).select_related('base_role')
+    all_users = User.objects.filter().select_related('base_role')
     current_members = project.members.values_list('user_id', flat=True)
 
     if request.method == 'POST':
