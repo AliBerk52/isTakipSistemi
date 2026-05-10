@@ -100,10 +100,10 @@ def login_view(request):
 
             user = authenticate(request, username=username, password=password)
             if user:
-                cache.delete(cache_key)
                 login(request, user)
+                remember_me = request.POST.get('remember_me') == 'on'
                 if remember_me:
-                    request.session.set_expiry(60 * 60 * 24 * 14)
+                   request.session.set_expiry(60 * 60 * 24 * 14)  # 14 gün
                 else:
                     request.session.set_expiry(0)
                 log_action(user, "Sisteme giriş yaptı")

@@ -83,9 +83,9 @@ STATIC_URL = '/static/'
 # Vercel için bu satır şart!
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles') 
 
-SESSION_COOKIE_AGE = 1209600  # Varsayılan süreyi 14 güne (saniye cinsinden) çıkardık
-SESSION_EXPIRE_AT_BROWSER_CLOSE = False  # Kontrolü "Beni Hatırla" kutucuğuna bıraktık
-SESSION_COOKIE_SECURE = False # Şimdilik local testler için False kalmalı
+SESSION_COOKIE_AGE = 1800  #Burayı 1209600 saniye yapan Ali'ye selamlarımı gönderiyorum, olsun denedin -hazal
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True  #sakın deneme
+SESSION_COOKIE_SECURE = True
 
 AUTH_USER_MODEL = 'management_app.User'
 LOGIN_URL = 'login'
