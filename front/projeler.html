@@ -1,35 +1,54 @@
 {% extends 'base.html' %}
 
-{% block title %}Projeler | İş Takip{% endblock %}
-{% block page_title %}Devam Eden Projeler{% endblock %}
+{% block title %}Projeler | İş Takip Sistemi{% endblock %}
 
 {% block content %}
+<div class="row mb-4">
+    <div class="col-md-8">
+        <h2 class="fw-bold text-dark mb-1">
+            <i class="fa-solid fa-diagram-project text-primary me-2"></i>Proje Portföyü
+        </h2>
+        <p class="text-muted">Dahil olduğunuz veya yetkili olduğunuz tüm projeler burada listelenir.</p>
+    </div>
+    <div class="col-md-4 text-md-end text-start">
+        {% if user.is_superuser %}
+        <a href="{% url 'project_create' %}" class="btn btn-primary shadow-sm rounded-pill px-4 py-2 fw-bold">
+            <i class="fa-solid fa-plus me-1"></i> Yeni Proje Başlat
+        </a>
+        {% endif %}
+    </div>
+</div>
+
 <div class="row g-4">
-    {% for proje in projeler %}
-    <div class="col-md-6 col-lg-4">
-        <div class="card border-0 shadow-sm rounded-4 h-100">
+    {% for proje in all_projects %}
+    <div class="col-md-6 col-xl-4">
+        <div class="card border-0 shadow-sm rounded-4 h-100 project-card position-relative overflow-hidden">
+            <div class="position-absolute top-0 start-0 w-100 bg-primary" style="height: 4px;"></div>
+            
             <div class="card-body p-4">
                 <div class="d-flex justify-content-between mb-3">
                     <span class="badge bg-primary bg-opacity-10 text-primary px-2 py-1"><i class="fa-solid fa-tag me-1"></i> {{ proje.kategori|default:"Yazılım" }}</span>
-                    <small class="text-muted"><i class="fa-regular fa-calendar me-1"></i>Bitiş: {{ proje.end_date|date:"d M Y"|default:"Belirtilmedi" }}</small>
+                    <small class="text-muted"><i class="fa-regular fa-calendar me-1"></i>Bitiş: {{ proje.bitis_tarihi|date:"d M Y"|default:"Belirtilmedi" }}</small>
                 </div>
-                <h5 class="fw-bold mb-2">{{ proje.project_name }}</h5>
-                <p class="text-muted small mb-4">{{ proje.description|truncatewords:15 }}</p>
+                <h5 class="fw-bold mb-2">{{ proje.isim }}</h5>
+                <p class="text-muted small mb-4">{{ proje.aciklama|truncatewords:15 }}</p>
                 
                 <div class="mb-3">
                     <div class="d-flex justify-content-between small mb-1">
                         <span class="fw-semibold">İlerleme</span>
                         <span class="fw-bold text-success">%{{ proje.ilerleme|default:"0" }}</span>
                     </div>
-                    <div class="progress" style="height: 8px;">
-                        <div class="progress-bar custom-progress bg-success rounded-pill" data-width="{{ proje.ilerleme|default:'0' }}"></div>
+                    <div class="col-6 text-end">
+                        <div class="text-muted small">Ekip Üyesi</div>
+                        <div class="fw-bold text-dark small">
+                            <i class="fa-solid fa-users me-1 text-secondary"></i>
+                            {{ proje.members.count|default:"0" }} Kişi
+                        </div>
                     </div>
                 </div>
 
                 <div class="d-grid mt-4">
-                    <a href="/projects/{{ proje.pk }}/" class="btn btn-light border text-primary fw-bold">
-                        Detaylara Git <i class="fa-solid fa-arrow-right ms-1"></i>
-                    </a>
+                    <a href="#" class="btn btn-light border text-primary fw-bold">Detaylara Git <i class="fa-solid fa-arrow-right ms-1"></i></a>
                 </div>
             </div>
         </div>
@@ -39,20 +58,34 @@
         <i class="fa-solid fa-box-open fa-4x text-muted mb-3"></i>
         <h4 class="text-secondary">Sistemde hiç proje bulunmuyor.</h4>
         {% if user.is_superuser %}
-        <a href="{% url 'project_create' %}" class="btn btn-primary mt-3"><i class="fa-solid fa-plus me-2"></i>Yeni Proje Oluştur</a>
+        <a href="{% url 'projeOlustur' %}" class="btn btn-primary mt-3"><i class="fa-solid fa-plus me-2"></i>Yeni Proje Oluştur</a>
         {% endif %}
     </div>
     {% endfor %}
 </div>
 
-<script>
-    document.addEventListener("DOMContentLoaded", function() {
-        document.querySelectorAll('.custom-progress').forEach(function(bar) {
-            var width = bar.getAttribute('data-width');
-            if(width) {
-                bar.style.width = width + '%';
-            }
-        });
-    });
-</script>
+<style>
+    .project-card {
+        transition: all 0.3s ease-in-out;
+        border: 1px solid rgba(0,0,0,0.05);
+    }
+    
+    .project-card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 12px 25px rgba(0,0,0,0.1) !important;
+        border-color: rgba(13, 110, 253, 0.2);
+    }
+
+    /* Metni 2 satırda sınırlayan ve VS Code uyarısını gideren kısım */
+    .text-truncate-2 {
+        display: -webkit-box;
+        -webkit-line-clamp: 2; /* Webkit tarayıcılar için */
+        line-clamp: 2;         /* Standart özellik (Hata veren eksik kısım buydu) */
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    .progress { background-color: #f0f2f5; }
+    .bg-light { background-color: #f8f9fa !important; }
+</style>
 {% endblock %}
