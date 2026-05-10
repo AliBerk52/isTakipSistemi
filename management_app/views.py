@@ -205,18 +205,36 @@ def project_create_view(request):
     form = ProjectForm(request.POST or None)
     if request.method == 'POST' and form.is_valid():
         project = form.save()
-        pm_role = Role.objects.filter(role_name='Project Manager').first() or \
-                  Role.objects.filter(role_name='Admin').first()
-        ProjectMember.objects.create(
-            project=project,
-            user=request.user,
-            role_in_project=pm_role
-        )
+
+        # Seçilen proje sorumlusunu ekle
+        manager_id = request.POST.get('project_admin')
+        if manager_id:
+            manager = User.objects.filter(pk=manager_id).first()
+            pm_role, _ = Role.objects.get_or_create(role_name='Project Manager')
+            if manager:
+                ProjectMember.objects.get_or_create(
+                    project=project, user=manager,
+                    defaults={'role_in_project': pm_role}
+                )
+
+        # Oluşturan kişiyi de ekle (admin ise)
+        if request.user != manager if manager_id else True:
+            admin_role = Role.objects.filter(role_name='Admin').first()
+            ProjectMember.objects.get_or_create(
+                project=project, user=request.user,
+                defaults={'role_in_project': admin_role}
+            )
+
         log_action(request.user, f"Proje oluşturuldu: '{project.project_name}'")
         messages.success(request, "Proje başarıyla oluşturuldu.")
         return redirect('project_detail', pk=project.pk)
 
-    return render(request, 'projeOlustur.html', {'form': form, 'action': 'Oluştur'})
+    users = User.objects.filter(is_active=True).select_related('base_role').order_by('username')
+    return render(request, 'projeOlustur.html', {
+        'form': form,
+        'action': 'Yeni Proje Oluştur',
+        'employees': users,
+    })
 
 
 @login_required
@@ -250,18 +268,18 @@ def project_update_view(request, pk: int):
 
 
 @login_required
-def project_delete_view(request, pk: int):
-    project = get_object_or_404(Project, pk=pk)
-    check_project_access(request.user, project)
+def project_list_view(request):
+    if request.user.is_staff or (
+        request.user.base_role and
+        request.user.base_role.role_name == 'Admin'
+    ):
+        projeler = Project.objects.all().order_by('-start_date')
+    else:
+        projeler = Project.objects.filter(
+            members__user=request.user
+        ).order_by('-start_date')
 
-    if request.method == 'POST':
-        name = project.project_name
-        project.delete()
-        log_action(request.user, f"Proje silindi: '{name}'")
-        messages.success(request, "Proje silindi.")
-        return redirect('project_list')
-
-    return render(request, 'projeArayuzu.html', {'project': project})
+    return render(request, 'projeler.html', {'projeler': projeler})
 
 
 @login_required
@@ -467,4 +485,18 @@ def team_create_view(request, project_pk: int):
         'current_members': current_members,
         'roles': Role.objects.all(),
     })
+
+@login_required
+def project_delete_view(request, pk: int):
+    project = get_object_or_404(Project, pk=pk)
+    check_project_access(request.user, project)
+
+    if request.method == 'POST':
+        name = project.project_name
+        project.delete()
+        log_action(request.user, f"Proje silindi: '{name}'")
+        messages.success(request, "Proje silindi.")
+        return redirect('project_list')
+
+    return render(request, 'projeArayuzu.html', {'project': project})
 
