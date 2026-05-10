@@ -12,7 +12,7 @@ import secrets
 
 from .models import (
     User, UserProfile, Project, ProjectMember, Task, TaskStatus,
-    PasswordResetToken, Role, ActionLog, Comment
+    PasswordResetToken, Role, ActionLog, Comment, Department
 )
 from .forms import (
     RegisterForm, LoginForm, ProjectForm, TaskForm, CommentForm,
@@ -200,8 +200,7 @@ def project_list_view(request):
     memberships = ProjectMember.objects.filter(
         user=request.user
     ).select_related('project')
-    return render(request, 'projeler.html', {'memberships': memberships})
-
+    return render(request, 'projeler.html', {'all_projects': projeler})
 
 @login_required
 def project_create_view(request):
@@ -508,3 +507,47 @@ def project_delete_view(request, pk: int):
 
     return render(request, 'projeArayuzu.html', {'project': project})
 
+
+@login_required
+@role_required(['Admin'])
+def admin_user_edit_view(request, pk: int):
+    emp = get_object_or_404(User, pk=pk)
+    roles = Role.objects.all()
+    departments = Department.objects.all()
+
+    if request.method == 'POST':
+        emp.email = request.POST.get('email', emp.email)
+
+        role_id = request.POST.get('role_id')
+        emp.base_role = Role.objects.filter(pk=role_id).first() if role_id else None
+
+        dept_id = request.POST.get('department_id')
+        emp.department = Department.objects.filter(pk=dept_id).first() if dept_id else None
+
+        emp.is_active = request.POST.get('is_active') == '1'
+        emp.save()
+
+        log_action(request.user, f"Kullanıcı düzenlendi: '{emp.username}'")
+        messages.success(request, f"{emp.username} güncellendi.")
+        return redirect('admin_user_list')
+
+    return render(request, 'kullaniciDuzenle.html', {
+        'emp': emp,
+        'roles': roles,
+        'departments': departments,
+    })
+
+
+def admin_user_tasks_view(request, pk: int):
+    emp = get_object_or_404(User, pk=pk)
+    tasks = Task.objects.filter(
+        assigned_worker=emp
+    ).select_related('project', 'status').order_by('-created_at')
+
+    completed_count = tasks.filter(status__status_name='Tamamlandı').count()
+
+    return render(request, 'kullaniciGorevleri.html', {
+        'emp': emp,
+        'tasks': tasks,
+        'completed_count': completed_count,
+    })

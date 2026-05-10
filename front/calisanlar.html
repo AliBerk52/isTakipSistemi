@@ -61,12 +61,20 @@
                 </div>
 
                 <div class="d-flex justify-content-center gap-2 border-top pt-3">
-                    <button class="btn btn-sm btn-light border flex-grow-1" title="Düzenle">
-                        <i class="fa-solid fa-user-pen"></i>
-                    </button>
-                    <button class="btn btn-sm btn-light border flex-grow-1 text-primary" title="İşlerini Gör">
+                    <a href="/admin-panel/users/{{ emp.pk }}/toggle/"
+                       class="btn btn-sm btn-light border flex-grow-1"
+                       title="{% if emp.is_active %}Pasif Yap{% else %}Aktif Yap{% endif %}"
+                       onclick="return confirm('{{ emp.username }} kullanıcısını {{ emp.is_active|yesno:'pasif,aktif' }} yapmak istediğinize emin misiniz?')">
+                        <i class="fa-solid fa-user-{% if emp.is_active %}slash{% else %}check{% endif %}"></i>
+                    </a>
+                    <a href="/admin-panel/users/{{ emp.pk }}/edit/"
+                     class="btn btn-sm btn-light border flex-grow-1" title="Düzenle">
+                    <i class="fa-solid fa-user-pen"></i>
+                    </a>
+                    <a href="/admin-panel/users/{{ emp.pk }}/tasks/"
+                       class="btn btn-sm btn-light border flex-grow-1 text-primary" title="İşlerini Gör">
                         <i class="fa-solid fa-list-check"></i>
-                    </button>
+                    </a>
                 </div>
             </div>
         </div>

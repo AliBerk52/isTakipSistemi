@@ -28,10 +28,10 @@
             <div class="card-body p-4">
                 <div class="d-flex justify-content-between mb-3">
                     <span class="badge bg-primary bg-opacity-10 text-primary px-2 py-1"><i class="fa-solid fa-tag me-1"></i> {{ proje.kategori|default:"Yazılım" }}</span>
-                    <small class="text-muted"><i class="fa-regular fa-calendar me-1"></i>Bitiş: {{ proje.bitis_tarihi|date:"d M Y"|default:"Belirtilmedi" }}</small>
+                    <small class="text-muted">Bitiş: {{ proje.end_date|date:"d M Y"|default:"Belirtilmedi" }}</small>
                 </div>
-                <h5 class="fw-bold mb-2">{{ proje.isim }}</h5>
-                <p class="text-muted small mb-4">{{ proje.aciklama|truncatewords:15 }}</p>
+                <h5 class="fw-bold mb-2">{{ proje.project_name }}</h5>
+                <p class="text-muted small mb-4">{{ proje.description|truncatewords:15 }}</p>
                 
                 <div class="mb-3">
                     <div class="d-flex justify-content-between small mb-1">
@@ -48,7 +48,7 @@
                 </div>
 
                 <div class="d-grid mt-4">
-                    <a href="#" class="btn btn-light border text-primary fw-bold">Detaylara Git <i class="fa-solid fa-arrow-right ms-1"></i></a>
+                    <a href="/projects/{{ proje.pk }}/" class="btn btn-light border text-primary fw-bold"> Detaylara Git <i class="fa-solid fa-arrow-right ms-1"></i></a>
                 </div>
             </div>
         </div>
@@ -58,7 +58,8 @@
         <i class="fa-solid fa-box-open fa-4x text-muted mb-3"></i>
         <h4 class="text-secondary">Sistemde hiç proje bulunmuyor.</h4>
         {% if user.is_superuser %}
-        <a href="{% url 'project_create' %}"> class="btn btn-primary mt-3"><i class="fa-solid fa-plus me-2"></i>Yeni Proje Oluştur</a>
+        <a href="{% url 'project_create' %}" class="btn btn-primary mt-3">
+            <i class="fa-solid fa-plus me-2"></i>Yeni Proje Oluştur</a>
         {% endif %}
     </div>
     {% endfor %}

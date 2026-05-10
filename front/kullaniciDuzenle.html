@@ -1,0 +1,80 @@
+{% extends 'base.html' %}
+{% block title %}Kullanıcı Düzenle | {{ emp.username }}{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-7">
+        <div class="card border-0 shadow-lg rounded-4">
+            <div class="card-header bg-primary text-white p-4 rounded-top-4">
+                <div class="d-flex align-items-center">
+                    <div class="bg-white bg-opacity-20 p-3 rounded-3 me-3">
+                        <i class="fa-solid fa-user-pen fa-xl"></i>
+                    </div>
+                    <div>
+                        <h4 class="mb-0 fw-bold">Kullanıcı Düzenle</h4>
+                        <p class="mb-0 small opacity-75">{{ emp.username }}</p>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body p-5">
+                {% if messages %}
+                {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                    {{ message }}<button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+                {% endfor %}
+                {% endif %}
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="mb-4">
+                        <label class="form-label fw-bold">Kullanıcı Adı</label>
+                        <input type="text" class="form-control form-control-lg border-2" value="{{ emp.username }}" disabled>
+                        <small class="text-muted">Kullanıcı adı değiştirilemez.</small>
+                    </div>
+                    <div class="mb-4">
+                        <label class="form-label fw-bold">E-posta</label>
+                        <input type="email" name="email" class="form-control border-2" value="{{ emp.email }}">
+                    </div>
+                    <div class="mb-4">
+                        <label class="form-label fw-bold">Rol</label>
+                        <select name="role_id" class="form-select border-2">
+                            <option value="">— Rol Seçin —</option>
+                            {% for role in roles %}
+                            <option value="{{ role.pk }}" {% if emp.base_role.pk == role.pk %}selected{% endif %}>
+                                {{ role.role_name }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-4">
+                        <label class="form-label fw-bold">Departman</label>
+                        <select name="department_id" class="form-select border-2">
+                            <option value="">— Departman Seçin —</option>
+                            {% for dept in departments %}
+                            <option value="{{ dept.pk }}" {% if emp.department.pk == dept.pk %}selected{% endif %}>
+                                {{ dept.name }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-4">
+                        <label class="form-label fw-bold">Hesap Durumu</label>
+                        <select name="is_active" class="form-select border-2">
+                            <option value="1" {% if emp.is_active %}selected{% endif %}>Aktif</option>
+                            <option value="0" {% if not emp.is_active %}selected{% endif %}>Pasif</option>
+                        </select>
+                    </div>
+                    <hr class="my-4 opacity-25">
+                    <div class="d-flex justify-content-between">
+                        <a href="/admin-panel/users/" class="btn btn-light border fw-bold px-4">
+                            <i class="fa-solid fa-arrow-left me-1"></i> Geri Dön
+                        </a>
+                        <button type="submit" class="btn btn-primary btn-lg fw-bold px-5">
+                            <i class="fa-solid fa-floppy-disk me-2"></i> Kaydet
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -70,4 +70,8 @@ urlpatterns = [
     path('admin-panel/logs/', views.admin_log_view, name='admin_log'),
 
     path('yonetim/projeler/<int:project_pk>/takim/', views.team_create_view, name='team_create'),
+
+    path('admin-panel/users/<int:pk>/edit/', views.admin_user_edit_view, name='admin_user_edit'),
+
+    path('admin-panel/users/<int:pk>/tasks/', views.admin_user_tasks_view, name='admin_user_tasks'),
 ]
