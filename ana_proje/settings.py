@@ -2,7 +2,8 @@ import os
 import dj_database_url
 from pathlib import Path
 from dotenv import load_dotenv
-
+import pymysql
+pymysql.install_as_MySQLdb()
 # .env dosyasını sisteme yükler
 load_dotenv()
 
@@ -84,7 +85,7 @@ STATIC_URL = '/static/'
 # Vercel için bu satır şart!
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles') 
 
-SESSION_COOKIE_AGE = 1800  #Burayı 1209600 saniye yapan Ali'ye selamlarımı gönderiyorum, olsun denedin -hazal
+SESSION_COOKIE_AGE = 1800  #Burayı 1209600 saniye yapan Ali'ye selamlarımı gönderiyorum, olsun denedin -hazal  #selamını aldım ama  keşke saniye olarak kalsaydı be
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True  #sakın deneme
 SESSION_COOKIE_SECURE = True
 
