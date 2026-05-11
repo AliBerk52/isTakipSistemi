@@ -1,6 +1,8 @@
 {% extends 'base.html' %}
 
-{% block title %}Yeni Proje Oluştur | İş Takip Sistemi{% endblock %}
+{% block title %}
+    {% if action == 'Güncelle' %}Projeyi Düzenle{% else %}Yeni Proje Oluştur{% endif %} | İş Takip Sistemi
+{% endblock %}
 
 {% block content %}
 <div class="row justify-content-center">
@@ -18,11 +20,15 @@
             <div class="card-header bg-primary text-white p-4 rounded-top-4">
                 <div class="d-flex align-items-center">
                     <div class="bg-white bg-opacity-20 p-3 rounded-3 me-3">
-                        <i class="fa-solid fa-folder-plus fa-xl"></i>
+                        <i class="fa-solid {% if action == 'Güncelle' %}fa-pen-to-square{% else %}fa-folder-plus{% endif %} fa-xl"></i>
                     </div>
                     <div>
-                        <h4 class="mb-0 fw-bold">Yeni Proje Başlat</h4>
-                        <p class="mb-0 small opacity-75">Sistemdeki tüm personeller arasından sorumlu atayabilirsiniz.</p>
+                        <h4 class="mb-0 fw-bold">
+                            {% if action == 'Güncelle' %}Projeyi Düzenle{% else %}Yeni Proje Başlat{% endif %}
+                        </h4>
+                        <p class="mb-0 small opacity-75">
+                            {% if action == 'Güncelle' %}Projenin mevcut bilgilerini aşağıdan değiştirebilirsiniz.{% else %}Sistemdeki tüm personeller arasından sorumlu atayabilirsiniz.{% endif %}
+                        </p>
                     </div>
                 </div>
             </div>
@@ -30,12 +36,12 @@
             <div class="card-body p-5">
                 <form method="POST">
                     {% csrf_token %}
-                    
+
                     <div class="mb-4">
                         <label class="form-label fw-bold text-dark">
                             <i class="fa-solid fa-heading me-1 text-primary"></i> Proje Adı
                         </label>
-                        <input type="text" name="project_name" class="form-control form-control-lg border-2"
+                        <input type="text" name="project_name" value="{{ form.project_name.value|default:'' }}" class="form-control form-control-lg border-2"
                                placeholder="Örn: 2024 Yılı Pazarlama Planı" required>
                     </div>
 
@@ -44,9 +50,10 @@
                             <i class="fa-solid fa-align-left me-1 text-primary"></i> Proje Detayları
                         </label>
                         <textarea name="description" class="form-control border-2" rows="4"
-                                  placeholder="Projenin hedefleri ve kapsamı hakkında kısa bilgi verin..."></textarea>
+                                  placeholder="Projenin hedefleri ve kapsamı hakkında kısa bilgi verin...">{{ form.description.value|default:'' }}</textarea>
                     </div>
 
+                    {% if action != 'Güncelle' %}
                     <div class="mb-4">
                         <label class="form-label fw-bold text-primary">
                             <i class="fa-solid fa-user-shield me-1"></i> Proje Sorumlusu Atayın
@@ -55,17 +62,18 @@
                             <option value="" disabled selected>Listeden bir personel seçin...</option>
                             {% for emp in employees %}
                                 <option value="{{ emp.id }}">
-                                    {{ emp.username }} 
+                                    {{ emp.username }}
                                     {% if emp.base_role %} — {{ emp.base_role.role_name }}{% endif %}
                                     {% if not emp.is_active %} (PASİF KULLANICI) {% endif %}
                                 </option>
                             {% endfor %}
                         </select>
                         <div class="form-text mt-2">
-                            <i class="fa-solid fa-circle-info me-1"></i> 
+                            <i class="fa-solid fa-circle-info me-1"></i>
                             Yönetici olarak hem <b>aktif</b> hem de <b>pasif</b> personelleri proje sorumlusu yapabilirsiniz.
                         </div>
                     </div>
+                    {% endif %}
 
                     <hr class="my-5 opacity-25">
 
@@ -74,7 +82,8 @@
                             <i class="fa-solid fa-arrow-left me-1"></i> Geri Dön
                         </a>
                         <button type="submit" class="btn btn-primary btn-lg fw-bold px-5 shadow-sm">
-                            <i class="fa-solid fa-floppy-disk me-2"></i> Projeyi Kaydet ve Başlat
+                            <i class="fa-solid fa-floppy-disk me-2"></i>
+                            {% if action == 'Güncelle' %}Değişiklikleri Kaydet{% else %}Projeyi Kaydet ve Başlat{% endif %}
                         </button>
                     </div>
                 </form>
