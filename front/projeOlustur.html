@@ -56,12 +56,12 @@
                     {% if action != 'Güncelle' %}
                     <div class="mb-4">
                         <label class="form-label fw-bold text-primary">
-                            <i class="fa-solid fa-user-shield me-1"></i> Proje Sorumlusu Atayın
+                            <i class="fa-solid fa-user-shield me-1"></i> Proje Sorumlusu
                         </label>
                         <select name="project_admin" class="form-select form-select-lg border-2 shadow-sm" required>
-                            <option value="" disabled selected>Listeden bir personel seçin...</option>
+                            <option value="" disabled>Listeden bir personel seçin...</option>
                             {% for emp in employees %}
-                                <option value="{{ emp.id }}">
+                                <option value="{{ emp.id }}" {% if project.project_admin.id == emp.id %}selected{% endif %}>
                                     {{ emp.username }}
                                     {% if emp.base_role %} — {{ emp.base_role.role_name }}{% endif %}
                                     {% if not emp.is_active %} (PASİF KULLANICI) {% endif %}
@@ -70,7 +70,7 @@
                         </select>
                         <div class="form-text mt-2">
                             <i class="fa-solid fa-circle-info me-1"></i>
-                            Yönetici olarak hem <b>aktif</b> hem de <b>pasif</b> personelleri proje sorumlusu yapabilirsiniz.
+                            Proje sorumlusunu istediğiniz zaman bu listeden değiştirebilirsiniz.
                         </div>
                     </div>
                     {% endif %}

@@ -278,13 +278,28 @@ def project_update_view(request, pk: int):
     check_project_access(request.user, project)
 
     form = ProjectForm(request.POST or None, instance=project)
-    if request.method == 'POST' and form.is_valid():
-        form.save()
-        log_action(request.user, f"Proje güncellendi: '{project.project_name}'")
-        messages.success(request, "Proje güncellendi.")
-        return redirect('project_detail', pk=pk)
+    employees = User.objects.all()  # Açılır menü dolsun diye listeyi çekiyoruz
 
-    return render(request, 'projeOlustur.html', {'form': form, 'action': 'Güncelle', 'project': project})
+    if request.method == 'POST' and form.is_valid():
+        project = form.save(commit=False)
+
+        # Seçilen sorumluyu yakalayıp kaydediyoruz
+        admin_id = request.POST.get('project_admin')
+        if admin_id:
+            new_admin = User.objects.get(pk=admin_id)
+            project.project_admin = new_admin
+
+        project.save()
+        log_action(request.user, f"Proje ve sorumlusu güncellendi: '{project.project_name}'")
+        messages.success(request, "Proje bilgileri ve sorumlusu başarıyla güncellendi.")
+        return redirect('admin_project_list')
+
+    return render(request, 'projeOlustur.html', {
+        'form': form,
+        'action': 'Güncelle',
+        'project': project,
+        'employees': employees  # Frontende gönderiyoruz
+    })
 
 
 @login_required
