@@ -31,14 +31,25 @@
                 <span style="font-size: 0.85rem; color: var(--text-muted); float: right;">Bitiş: {{ project.end_date|default:"Belirsiz" }}</span>
             </div>
             
-            <div style="display: flex; gap: 10px; margin-top: 15px;">
-                <a href="{% url 'project_detail' project.pk %}" class="btn" style="background-color: #343a40; color: white; text-decoration: none; flex: 1; text-align: center; padding: 8px 12px; border-radius: 5px;">Detaylar</a>
+            <div style="display: flex; gap: 15px; margin-top: 20px;">
+                <a href="{% url 'project_detail' project.pk %}"
+                   style="flex: 1; background-color: #4b5563; color: white; text-decoration: none; text-align: center; padding: 10px; border-radius: 6px; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                   <i class="fa-solid fa-circle-info"></i> Detaylar
+                </a>
 
-                <form action="{% url 'project_toggle' project.pk %}" method="post" style="flex: 1;">
+                <form action="{% url 'project_toggle' project.pk %}" method="post" style="flex: 1; display: flex;">
                     {% csrf_token %}
-                    <button type="submit" class="btn {% if project.is_active %}btn-status-pasife-al{% else %}btn-status-aktife-al{% endif %}" style="width: 100%; padding: 8px 12px; border-radius: 5px; border: none; cursor: pointer; font-weight: bold;">
-                        {% if project.is_active %}Pasife Al{% else %}Aktife Al{% endif %}
-                    </button>
+                    {% if project.is_active %}
+                        <button type="submit"
+                                style="width: 100%; background-color: #ef4444; color: white; padding: 10px; border-radius: 6px; border: none; cursor: pointer; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 8px; transition: 0.2s;">
+                            <i class="fa-solid fa-pause"></i> Pasife Al
+                        </button>
+                    {% else %}
+                        <button type="submit"
+                                style="width: 100%; background-color: #10b981; color: white; padding: 10px; border-radius: 6px; border: none; cursor: pointer; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 8px; transition: 0.2s;">
+                            <i class="fa-solid fa-play"></i> Aktife Al
+                        </button>
+                    {% endif %}
                 </form>
             </div>
         </div>
