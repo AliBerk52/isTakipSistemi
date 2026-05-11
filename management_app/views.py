@@ -277,19 +277,31 @@ def project_update_view(request, pk: int):
     project = get_object_or_404(Project, pk=pk)
     check_project_access(request.user, project)
 
+    # Formu ve aktif çalışanları çekiyoruz
     form = ProjectForm(request.POST or None, instance=project)
-    employees = User.objects.all()  # Açılır menü dolsun diye listeyi çekiyoruz
+    employees = User.objects.filter(is_active=True).order_by('username')
 
     if request.method == 'POST' and form.is_valid():
-        project = form.save(commit=False)
+        # 1. Projenin kendi temel verilerini (ad, açıklama) kaydediyoruz
+        form.save()
 
-        # Seçilen sorumluyu yakalayıp kaydediyoruz
+        # 2. Sorumluyu ProjectMember tablosu üzerinden güncelliyoruz
         admin_id = request.POST.get('project_admin')
         if admin_id:
             new_admin = User.objects.get(pk=admin_id)
-            project.project_admin = new_admin
+            pm_role, _ = Role.objects.get_or_create(role_name='Project Manager')
 
-        project.save()
+            # Bu projedeki mevcut 'Project Manager' rolüne sahip üyeyi bul
+            existing_pm = ProjectMember.objects.filter(project=project, role_in_project=pm_role).first()
+
+            if existing_pm:
+                # Eğer zaten bir sorumlu atanmışsa, sadece o kaydın kullanıcısını değiştir
+                existing_pm.user = new_admin
+                existing_pm.save()
+            else:
+                # Eğer projeye daha önce hiç sorumlu atanmamışsa, yeni kayıt oluştur
+                ProjectMember.objects.create(project=project, user=new_admin, role_in_project=pm_role)
+
         log_action(request.user, f"Proje ve sorumlusu güncellendi: '{project.project_name}'")
         messages.success(request, "Proje bilgileri ve sorumlusu başarıyla güncellendi.")
         return redirect('admin_project_list')
@@ -298,7 +310,7 @@ def project_update_view(request, pk: int):
         'form': form,
         'action': 'Güncelle',
         'project': project,
-        'employees': employees  # Frontende gönderiyoruz
+        'employees': employees
     })
 
 
