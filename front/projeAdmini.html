@@ -31,15 +31,15 @@
                 <span style="font-size: 0.85rem; color: var(--text-muted); float: right;">Bitiş: {{ project.end_date|default:"Belirsiz" }}</span>
             </div>
             
-            <div style="display: flex; gap: 10px;">
-                 <a href="{% url 'project_detail' project.pk %}" class="btn" style="background-color: var(--sidebar-bg); color: white; text-decoration: none; flex: 1; text-align: center;">Detaylar</a>
-                 
-                 <form action="{% url 'project_toggle' project.pk %}" method="post" style="flex: 1;">
-                     {% csrf_token %}
-                     <button type="submit" class="btn style-reset {% if project.is_active %}btn-status-pasife-al{% else %}btn-status-aktife-al{% endif %}" style="width: 100%;">
-                         {% if project.is_active %}Pasife Al{% else %}Aktife Al{% endif %}
-                     </button>
-                 </form>
+            <div style="display: flex; gap: 10px; margin-top: 15px;">
+                <a href="{% url 'project_detail' project.pk %}" class="btn" style="background-color: #343a40; color: white; text-decoration: none; flex: 1; text-align: center; padding: 8px 12px; border-radius: 5px;">Detaylar</a>
+
+                <form action="{% url 'project_toggle' project.pk %}" method="post" style="flex: 1;">
+                    {% csrf_token %}
+                    <button type="submit" class="btn {% if project.is_active %}btn-status-pasife-al{% else %}btn-status-aktife-al{% endif %}" style="width: 100%; padding: 8px 12px; border-radius: 5px; border: none; cursor: pointer; font-weight: bold;">
+                        {% if project.is_active %}Pasife Al{% else %}Aktife Al{% endif %}
+                    </button>
+                </form>
             </div>
         </div>
     {% empty %}
