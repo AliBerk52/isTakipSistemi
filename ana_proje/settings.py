@@ -37,7 +37,6 @@ MIDDLEWARE = [
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'management_app.middleware.SessionTimeoutMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
@@ -84,11 +83,7 @@ USE_TZ = True
 STATICFILES_DIRS = [BASE_DIR / 'front']
 STATIC_URL = '/static/'
 # Vercel için bu satır şart!
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
-
-# Media Dosyaları (Avatar, Proje Dosyaları)
-MEDIA_URL = '/media/'
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles') 
 
 SESSION_COOKIE_AGE = 1800  #Burayı 1209600 saniye yapan Ali'ye selamlarımı gönderiyorum, olsun denedin -hazal  #selamını aldım ama  keşke saniye olarak kalsaydı be
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True  #sakın deneme
