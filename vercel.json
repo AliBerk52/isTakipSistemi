@@ -1,4 +1,5 @@
 {
+  "buildCommand": "pip install -r requirements.txt",
   "builds": [
     {
       "src": "ana_proje/wsgi.py",
@@ -8,10 +9,10 @@
       }
     }
   ],
-  "rewrites": [
+  "routes": [
     {
-      "source": "/(.*)",
-      "destination": "/ana_proje/wsgi.py"
+      "src": "/(.*)",
+      "dest": "ana_proje/wsgi.py"
     }
   ]
 }
