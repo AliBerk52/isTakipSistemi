@@ -53,7 +53,7 @@ def register_view(request):
     if request.method == 'POST':
         if form.is_valid():
             user = form.save()
-            worker_role, _ = Role.objects.get_or_create(role_name='Çalışan')
+            worker_role, _ = Role.objects.get_or_create(role_name='Worker')
             user.base_role = worker_role
             user.save()
             UserProfile.objects.create(user=user)
