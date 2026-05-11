@@ -5,35 +5,93 @@
 
 {% block content %}
 <style>
-    /* Proje Kart Durum Kenarlıkları */
-    .project-card-active { border-top: 4px solid var(--success); }
-    .project-card-inactive { border-top: 4px solid var(--danger); }
+    /* Modern Kart Tasarımı */
+    .pro-card {
+        background-color: #ffffff;
+        border-radius: 12px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+        padding: 24px;
+        margin-bottom: 20px;
+        border: 1px solid #f3f4f6;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
 
-    /* Durum Değiştirme Butonları */
-    .btn-status-pasife-al { background-color: var(--warning) !important; color: #000 !important; }
-    .btn-status-aktife-al { background-color: var(--success) !important; color: white !important; }
+    .pro-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    }
+
+    /* Üst Renkli Çizgi (Aktif/Pasif) */
+    .border-active { border-top: 4px solid #10b981; }
+    .border-inactive { border-top: 4px solid #ef4444; }
+
+    /* Tipografi ve İçerik */
+    .pro-title {
+        font-size: 1.4rem;
+        font-weight: 700;
+        color: #1f2937;
+        margin-top: 0;
+        margin-bottom: 8px;
+    }
+
+    .pro-desc {
+        font-size: 0.95rem;
+        color: #6b7280;
+        line-height: 1.6;
+        margin-bottom: 20px;
+    }
+
+    /* Rozet ve Tarih Kısmı */
+    .pro-meta {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding-bottom: 16px;
+        border-bottom: 1px solid #e5e7eb; /* Butonlarla araya ince bir çizgi */
+        margin-bottom: 16px;
+    }
+
+    .pro-badge {
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .badge-active { background-color: #d1fae5; color: #065f46; }
+    .badge-inactive { background-color: #fee2e2; color: #991b1b; }
+
+    .pro-date {
+        font-size: 0.85rem;
+        color: #9ca3af;
+        font-weight: 500;
+    }
 </style>
 
-<div class="page-header">
-    <h1>Sistemdeki Tüm Projeler</h1>
-    <a href="{% url 'project_create' %}" class="btn btn-primary" style="text-decoration: none;"><i class="fa-solid fa-plus"></i> Yeni Proje Ekle</a>
+<div class="page-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+    <h1 style="font-size: 1.8rem; color: #111827; margin: 0;">Sistemdeki Tüm Projeler</h1>
+    <a href="{% url 'project_create' %}" class="btn" style="background-color: #2563eb; color: white; padding: 10px 16px; border-radius: 6px; text-decoration: none; font-weight: 600;"><i class="fa-solid fa-plus"></i> Yeni Proje Ekle</a>
 </div>
 
-<div class="card-grid">
+<div class="card-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(400px, 1fr)); gap: 24px;">
     {% for project in projects %}
-        <div class="card {% if project.is_active %}project-card-active{% else %}project-card-inactive{% endif %}">
-            <h3 class="card-title">{{ project.project_name }}</h3>
-            <p class="card-desc">{{ project.description|truncatewords:15|default:"Açıklama yok." }}</p>
-            <div style="margin-bottom: 15px;">
-                <span class="badge {% if project.is_active %}badge-success{% else %}badge-warning{% endif %}">
+        <div class="pro-card {% if project.is_active %}border-active{% else %}border-inactive{% endif %}">
+
+            <h3 class="pro-title">{{ project.project_name }}</h3>
+            <p class="pro-desc">{{ project.description|truncatewords:20|default:"Bu proje için henüz bir açıklama girilmemiş." }}</p>
+
+            <div class="pro-meta">
+                <span class="pro-badge {% if project.is_active %}badge-active{% else %}badge-inactive{% endif %}">
                     {% if project.is_active %}Aktif{% else %}Pasif{% endif %}
                 </span>
-                <span style="font-size: 0.85rem; color: var(--text-muted); float: right;">Bitiş: {{ project.end_date|default:"Belirsiz" }}</span>
+                <span class="pro-date"><i class="fa-regular fa-calendar" style="margin-right: 5px;"></i> Bitiş: {{ project.end_date|default:"Belirsiz" }}</span>
             </div>
-            
-            <div style="display: flex; gap: 15px; margin-top: 20px;">
+
+            <div style="display: flex; gap: 15px;">
                 <a href="{% url 'project_detail' project.pk %}"
-                   style="flex: 1; background-color: #4b5563; color: white; text-decoration: none; text-align: center; padding: 10px; border-radius: 6px; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                   style="flex: 1; background-color: #4b5563; color: white; text-decoration: none; text-align: center; padding: 10px; border-radius: 6px; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 8px; transition: 0.2s;">
                    <i class="fa-solid fa-circle-info"></i> Detaylar
                 </a>
 
@@ -52,10 +110,12 @@
                     {% endif %}
                 </form>
             </div>
+
         </div>
     {% empty %}
-        <div class="card" style="grid-column: 1 / -1;">
-            <p>Sistemde kayıtlı proje bulunmamaktadır.</p>
+        <div class="pro-card" style="grid-column: 1 / -1; text-align: center; color: #6b7280; padding: 40px;">
+            <i class="fa-solid fa-folder-open" style="font-size: 3rem; margin-bottom: 15px; color: #d1d5db;"></i>
+            <p style="font-size: 1.1rem;">Sistemde kayıtlı proje bulunmamaktadır.</p>
         </div>
     {% endfor %}
 </div>
