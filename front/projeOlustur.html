@@ -53,15 +53,14 @@
                                   placeholder="Projenin hedefleri ve kapsamı hakkında kısa bilgi verin...">{{ form.description.value|default:'' }}</textarea>
                     </div>
 
-                    {% if action != 'Güncelle' %}
                     <div class="mb-4">
                         <label class="form-label fw-bold text-primary">
                             <i class="fa-solid fa-user-shield me-1"></i> Proje Sorumlusu
                         </label>
                         <select name="project_admin" class="form-select form-select-lg border-2 shadow-sm" required>
-                            <option value="" disabled>Listeden bir personel seçin...</option>
+                            <option value="" disabled {% if not project.project_admin %}selected{% endif %}>Listeden bir personel seçin...</option>
                             {% for emp in employees %}
-                                <option value="{{ emp.id }}" {% if project.project_admin.id == emp.id %}selected{% endif %}>
+                                <option value="{{ emp.id }}" {% if project.project_admin and project.project_admin.id == emp.id %}selected{% endif %}>
                                     {{ emp.username }}
                                     {% if emp.base_role %} — {{ emp.base_role.role_name }}{% endif %}
                                     {% if not emp.is_active %} (PASİF KULLANICI) {% endif %}
@@ -73,7 +72,6 @@
                             Proje sorumlusunu istediğiniz zaman bu listeden değiştirebilirsiniz.
                         </div>
                     </div>
-                    {% endif %}
 
                     <hr class="my-5 opacity-25">
 
