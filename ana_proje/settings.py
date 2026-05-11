@@ -96,8 +96,10 @@ LOGOUT_REDIRECT_URL = 'login'
 
 
 
-# E-Posta ayarlarını dış dosyadan çekiyoruz
-try:
-    from .email_settings import *
-except ImportError:
-    print("Uyarı: email_settings.py dosyası bulunamadı!")
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'admin.istakippro@gmail.com'
+EMAIL_HOST_PASSWORD = 'kwnt zfcd vswz kyej'
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER

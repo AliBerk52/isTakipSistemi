@@ -24,7 +24,7 @@
     </style>
 </head>
 <body class="d-flex">
-
+    {% if request.resolver_match.url_name not in 'password_reset_request,password_reset_confirm,login,register' %}
     <div class="sidebar flex-shrink-0 shadow">
         <div class="p-4 border-bottom border-secondary text-center">
             <a href="{% url 'dashboard' %}" style="text-decoration:none;">
@@ -94,6 +94,7 @@
             </form>
         </div>
     </div>
+    {% endif %}
 
     <div class="content">
         {% if messages %}

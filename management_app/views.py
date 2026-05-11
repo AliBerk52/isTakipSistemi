@@ -7,6 +7,7 @@ from django.core.cache import cache
 from django.utils import timezone
 from datetime import timedelta
 import secrets
+from django.core.mail import send_mail
 
 from .models import (
     User, UserProfile, Project, ProjectMember, Task, TaskStatus,
@@ -137,7 +138,13 @@ def password_reset_request_view(request):
             PasswordResetToken.objects.create(user=user, token=token)
             reset_url = request.build_absolute_uri(f'/sifre-sifirla/{token}/')
             log_action(user, "Şifre sıfırlama isteği oluşturuldu")
-            messages.info(request, f"[DEV] Sıfırlama linki: {reset_url}")
+            send_mail(
+                subject='Şifre Sıfırlama Bağlantısı',
+                message=f'Şifrenizi sıfırlamak için tıklayın: {reset_url}',
+                from_email=None,  # settings.DEFAULT_FROM_EMAIL kullanır
+                recipient_list=[user.email],
+                fail_silently=False,
+            )
         except User.DoesNotExist:
             pass
         messages.success(request, "E-posta adresiniz sistemde kayıtlıysa sıfırlama bağlantısı gönderildi.")
