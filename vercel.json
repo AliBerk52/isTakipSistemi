@@ -8,10 +8,10 @@
       }
     }
   ],
-  "routes": [
+  "rewrites": [
     {
-      "src": "/(.*)",
-      "dest": "ana_proje/wsgi.py"
+      "source": "/(.*)",
+      "destination": "/ana_proje/wsgi.py"
     }
   ]
 }
