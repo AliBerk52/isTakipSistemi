@@ -69,7 +69,11 @@
                         </td>
 
                         <td>
-                            <span class="badge rounded-pill bg-success px-3">Aktif</span>
+                            {% if proje.is_active %}
+                                <span class="badge rounded-pill bg-success px-3">Aktif</span>
+                            {% else %}
+                                <span class="badge rounded-pill bg-danger px-3">Pasif</span>
+                            {% endif %}
                         </td>
 
                         <td class="text-end pe-4">
