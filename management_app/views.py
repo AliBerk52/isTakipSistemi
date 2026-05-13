@@ -87,17 +87,16 @@ def login_view(request):
             return render(request, 'login.html', {'form': form, 'locked': True})
 
         if form.is_valid():
-            username = form.cleaned_data['username']
+            input_username = form.cleaned_data['username']
             password = form.cleaned_data['password']
             remember_me = request.POST.get('remember_me') == 'on'
 
-            try:
-                real_user = User.objects.get(username__iexact=username)
-                username = real_user.username  # orijinal hali ile authenticate et
-            except User.DoesNotExist:
-                print("Böyle bir kullanıcı yoktur.")
+            user = authenticate(request, username=input_username, password=password)
 
-            user = authenticate(request, username=username, password=password)
+            # MySQL harf büyüklüğünü takmadığı için Python ile KESİN kontrol yapıyoruz:
+            if user is not None and user.username != input_username:
+                user = None  # Harfler birebir aynı değilse girişi reddet!
+
             if user:
                 cache.delete(cache_key)
                 login(request, user)
