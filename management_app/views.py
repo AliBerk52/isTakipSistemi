@@ -104,7 +104,7 @@ def login_view(request):
                     request.session.set_expiry(60 * 60 * 24 * 14)
                 else:
                     request.session.set_expiry(0)
-                log_action(user, "Sisteme giriş yaptı")
+                log_action(user, "Sisteme giriş yaptı (IP: {ip})")
 
                 role_name = user.base_role.role_name if user.base_role else None
                 if user.is_superuser or role_name == 'Admin':
