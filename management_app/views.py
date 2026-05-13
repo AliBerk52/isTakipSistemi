@@ -104,7 +104,7 @@ def login_view(request):
                     request.session.set_expiry(60 * 60 * 24 * 14)
                 else:
                     request.session.set_expiry(0)
-                log_action(user, "Sisteme giriş yaptı (IP: {ip})")
+                log_action(user, f"Sisteme giriş yaptı (IP: {ip})")
 
                 role_name = user.base_role.role_name if user.base_role else None
                 if user.is_superuser or role_name == 'Admin':
@@ -132,7 +132,8 @@ def login_view(request):
 
 def logout_view(request):
     if request.user.is_authenticated:
-        log_action(request.user, "Sistemden çıkış yaptı")
+        ip = get_client_ip(request)
+        log_action(request.user, f"Sistemden çıkış yaptı (IP:{ip})")
         logout(request)
     return redirect('login')
 
