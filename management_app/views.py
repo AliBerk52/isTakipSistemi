@@ -484,7 +484,7 @@ def admin_dashboard_view(request):
 @login_required
 @role_required(['Admin'])
 def admin_user_list_view(request):
-    users = User.objects.select_related('base_role', 'membership').order_by('username')
+    users = User.objects.filter(is_active=True).select_related('base_role', 'membership').order_by('username')
     return render(request, 'calisanlar.html', {'users': users})
 
 
