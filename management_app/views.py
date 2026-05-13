@@ -114,9 +114,18 @@ def login_view(request):
                 else:
                     return redirect('dashboard')
             else:
+                # GİRİNTİLER DÜZELTİLDİ
                 cache.set(cache_key, attempts + 1, LOCKOUT_SECONDS)
                 remaining = MAX_LOGIN_ATTEMPTS - (attempts + 1)
                 messages.error(request, f"Kullanıcı adı veya şifre hatalı. Kalan deneme hakkı: {max(remaining, 0)}")
+
+                # BAŞARISIZ GİRİŞİ LOGLAMA KISMI DÜZELTİLDİ
+                try:
+                    # 'username' yerine 'input_username' kullanıldı
+                    failed_user = User.objects.get(username__iexact=input_username)
+                    log_action(failed_user, f"Başarısız giriş denemesi (IP: {ip})")
+                except User.DoesNotExist:
+                    pass
 
     return render(request, 'login.html', {'form': form})
 
