@@ -2,9 +2,9 @@ from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.utils import timezone
 
-# ==========================================
-# 1. YETKİLENDİRME VE YAPI GRUBU
-# ==========================================
+# ================
+# 1. YETKİLENDİRME
+# ================
 
 class Role(models.Model):
     role_name = models.CharField(max_length=30, unique=True)
@@ -46,9 +46,9 @@ class UserProfile(models.Model):
     def __str__(self):
         return f"{self.user.username}'s Profile"
 
-# ==========================================
+# =================
 # 2. PROJE YÖNETİMİ
-# ==========================================
+# =================
 
 class Project(models.Model):
     project_name = models.CharField(max_length=200)
@@ -76,9 +76,9 @@ class ProjectMember(models.Model):
     class Meta:
         unique_together = ('project', 'user')
 
-# ==========================================
+# ========================
 # 3. GÖREVLER VE ETKİLEŞİM
-# ==========================================
+# ========================
 
 class TaskStatus(models.Model):
     status_name = models.CharField(max_length=50, unique=True)
@@ -108,9 +108,9 @@ class Comment(models.Model):
     def __str__(self):
         return f"Comment by {self.user.username} on {self.task.task_name}"
 
-# ==========================================
+# ======================
 # 4. GÜVENLİK VE LOGLAMA
-# ==========================================
+# ======================
 
 class ActionLog(models.Model):
     """Nihai yönetim paneli için sistem hareketleri"""
