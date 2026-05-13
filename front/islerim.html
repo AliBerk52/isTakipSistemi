@@ -5,89 +5,415 @@
 
 {% block content %}
 <style>
-    /* Kart Kenarlık Renkleri */
-    .task-card-main { border-left: 4px solid #64748b; margin-bottom: 20px; }
-    .border-todo { border-left-color: #3b82f6 !important; }
-    .border-inprogress { border-left-color: #f59e0b !important; }
-    .border-issue { border-left-color: #ef4444 !important; }
-    .border-done { border-left-color: #10b981 !important; }
+    :root {
+        --color-todo: #3b82f6;
+        --color-inprogress: #f59e0b;
+        --color-issue: #ef4444;
+        --color-done: #10b981;
+        --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+        --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.07);
+        --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
+    }
 
-    /* Etiket (Badge) Arka Plan Renkleri */
-    .badge-todo { background-color: #3b82f6; }
-    .badge-inprogress { background-color: #f59e0b; }
-    .badge-issue { background-color: #ef4444; }
-    .badge-done { background-color: #10b981; }
-    .badge-default { background-color: #64748b; }
+    /* Header */
+    .task-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 35px;
+        border-radius: 12px;
+        margin-bottom: 30px;
+        box-shadow: var(--shadow-lg);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .task-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -10%;
+        width: 300px;
+        height: 300px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 50%;
+    }
+
+    .task-header-content {
+        position: relative;
+        z-index: 1;
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 20px;
+    }
+
+    .task-header-info h1 {
+        margin: 0;
+        font-size: 2rem;
+        font-weight: 700;
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .task-header-info p {
+        margin: 12px 0 0 0;
+        font-size: 0.95rem;
+        opacity: 0.95;
+    }
+
+    .task-header-info a {
+        color: white;
+        text-decoration: underline;
+    }
+
+    .btn-edit {
+        padding: 12px 24px;
+        background: white;
+        color: #667eea;
+        text-decoration: none;
+        border-radius: 8px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        border: none;
+        cursor: pointer;
+    }
+
+    .btn-edit:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    /* Main Layout */
+    .task-layout {
+        display: grid;
+        grid-template-columns: 2fr 1fr;
+        gap: 25px;
+        margin-bottom: 30px;
+    }
+
+    /* Cards */
+    .card-modern {
+        background: white;
+        border-radius: 12px;
+        padding: 25px;
+        box-shadow: var(--shadow-md);
+        border: 1px solid #e2e8f0;
+        transition: all 0.3s ease;
+    }
+
+    .card-modern:hover {
+        box-shadow: var(--shadow-lg);
+    }
+
+    /* Description Card */
+    .description-card {
+        border-top: 4px solid #667eea;
+    }
+
+    .description-card h3 {
+        margin: 0 0 20px 0;
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: #1e293b;
+    }
+
+    .description-text {
+        white-space: pre-line;
+        line-height: 1.8;
+        font-size: 0.95rem;
+        color: #475569;
+    }
+
+    .description-empty {
+        color: #94a3b8;
+        font-style: italic;
+        padding: 20px;
+        background: #f8fafc;
+        border-radius: 8px;
+        text-align: center;
+    }
+
+    /* Comments Section */
+    .comments-section h3 {
+        margin: 0 0 25px 0;
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: #1e293b;
+    }
+
+    .comments-list {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+        margin-bottom: 25px;
+    }
+
+    .comment-item {
+        background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+        padding: 18px;
+        border-radius: 10px;
+        border: 1px solid #e2e8f0;
+        transition: all 0.3s ease;
+    }
+
+    .comment-item:hover {
+        transform: translateX(4px);
+        border-color: #667eea;
+    }
+
+    .comment-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 12px;
+        font-size: 0.85rem;
+    }
+
+    .comment-user {
+        font-weight: 700;
+        color: #1e293b;
+    }
+
+    .comment-date {
+        color: #94a3b8;
+    }
+
+    .comment-content {
+        margin: 0;
+        font-size: 0.95rem;
+        color: #475569;
+        line-height: 1.6;
+    }
+
+    .comments-empty {
+        text-align: center;
+        padding: 30px;
+        color: #94a3b8;
+        font-style: italic;
+    }
+
+    /* Info Panel */
+    .info-panel {
+        background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+        border-top: 4px solid #667eea;
+    }
+
+    .info-panel h3 {
+        margin: 0 0 25px 0;
+        padding-bottom: 15px;
+        border-bottom: 1px solid #e2e8f0;
+        font-size: 1.15rem;
+        font-weight: 700;
+        color: #1e293b;
+    }
+
+    .info-item {
+        margin-bottom: 20px;
+    }
+
+    .info-label {
+        color: #94a3b8;
+        font-size: 0.8rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        display: block;
+        margin-bottom: 8px;
+    }
+
+    .info-value {
+        font-size: 0.95rem;
+        color: #1e293b;
+        font-weight: 500;
+    }
+
+    .status-badge {
+        display: inline-block;
+        padding: 8px 16px;
+        border-radius: 20px;
+        font-weight: 600;
+        font-size: 0.85rem;
+        color: white;
+    }
+
+    .status-todo { background-color: var(--color-todo); }
+    .status-inprogress { background-color: var(--color-inprogress); }
+    .status-issue { background-color: var(--color-issue); }
+    .status-done { background-color: var(--color-done); }
+
+    .assigned-user {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .user-avatar {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: 700;
+        font-size: 0.8rem;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .task-header {
+            padding: 25px;
+        }
+
+        .task-header-content {
+            flex-direction: column;
+        }
+
+        .task-header-info h1 {
+            font-size: 1.5rem;
+        }
+
+        .task-layout {
+            grid-template-columns: 1fr;
+        }
+    }
 </style>
 
-<div class="page-header">
-    <div>
-        <h1 style="margin-bottom: 5px;">{{ task.task_name }}</h1>
-        <p style="color: var(--text-muted);">Proje: <a href="{% url 'project_detail' task.project.pk %}" style="color: var(--primary-color);">{{ task.project.project_name }}</a></p>
+<!-- Task Header -->
+<div class="task-header">
+    <div class="task-header-content">
+        <div class="task-header-info">
+            <h1><i class="fa-solid fa-tasks"></i> {{ task.task_name }}</h1>
+            <p>
+                <i class="fa-solid fa-folder"></i> Proje: 
+                <a href="{% url 'project_detail' task.project.pk %}">{{ task.project.project_name }}</a>
+            </p>
+        </div>
+        {% if request.user == task.assigned_worker or request.user.base_role.role_name == 'Project Manager' or request.user.base_role.role_name == 'Admin' %}
+            <a href="{% url 'task_update' task.pk %}" class="btn-edit">
+                <i class="fa-solid fa-pen-to-square"></i> Düzenle
+            </a>
+        {% endif %}
     </div>
-    {% if request.user == task.assigned_worker or request.user.base_role.role_name == 'Project Manager' or request.user.base_role.role_name == 'Admin' %}
-        <a href="{% url 'task_update' task.pk %}" class="btn btn-primary" style="text-decoration: none;">Görevi Düzenle</a>
-    {% endif %}
 </div>
 
-<div style="display: grid; grid-template-columns: 2fr 1fr; gap: 20px;">
+<!-- Main Content -->
+<div class="task-layout">
+    <!-- Left Column -->
     <div>
-        <div class="card task-card-main 
-            {% if task.status.status_name == 'Yapılacak' %}border-todo
-            {% elif task.status.status_name == 'Devam Ediyor' %}border-inprogress
-            {% elif task.status.status_name == 'Sorun Var' %}border-issue
-            {% elif task.status.status_name == 'Tamamlandı' %}border-done{% endif %}">
-            
-            <h3>Görev Açıklaması</h3>
-            <p style="white-space: pre-line; line-height: 1.6; margin-top: 15px;">{{ task.description|default:"Bu görev için bir açıklama girilmemiş." }}</p>
+        <!-- Description Card -->
+        <div class="card-modern description-card">
+            <h3><i class="fa-solid fa-align-left"></i> Görev Açıklaması</h3>
+            {% if task.description %}
+                <p class="description-text">{{ task.description }}</p>
+            {% else %}
+                <div class="description-empty">
+                    <i class="fa-solid fa-inbox"></i><br>
+                    Bu görev için açıklama girilmemiş.
+                </div>
+            {% endif %}
         </div>
 
-        <div class="card">
-            <h3>Yorumlar ve Güncellemeler</h3>
-            <div style="margin-top: 20px; display: flex; flex-direction: column; gap: 15px;">
+        <!-- Comments Card -->
+        <div class="card-modern" style="margin-top: 25px;">
+            <h3><i class="fa-solid fa-comments"></i> Yorumlar ve Güncellemeler</h3>
+            
+            <div class="comments-list">
                 {% for comment in comments %}
-                    <div style="background-color: #f8fafc; padding: 15px; border-radius: 8px; border: 1px solid #e2e8f0;">
-                        <div style="display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 0.85rem;">
-                            <strong>{{ comment.user.username }}</strong>
-                            <span style="color: var(--text-muted);">{{ comment.created_at|date:"d M Y H:i" }}</span>
+                    <div class="comment-item">
+                        <div class="comment-header">
+                            <span class="comment-user">{{ comment.user.username }}</span>
+                            <span class="comment-date">{{ comment.created_at|date:"d M Y H:i" }}</span>
                         </div>
-                        <p style="margin: 0; font-size: 0.95rem;">{{ comment.content }}</p>
+                        <p class="comment-content">{{ comment.content }}</p>
                     </div>
                 {% empty %}
-                    <p style="color: var(--text-muted); font-style: italic;">Henüz yorum yapılmamış.</p>
+                    <div class="comments-empty">
+                        <i class="fa-solid fa-comment-slash"></i><br>
+                        Henüz yorum yapılmamış. Başlayabilirsiniz!
+                    </div>
                 {% endfor %}
             </div>
+
+            <!-- Add Comment Form -->
+            {% if request.user.is_authenticated %}
+                <form method="post" action="{% url 'comment_create' task.pk %}" style="margin-top: 20px;">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <textarea name="content" class="form-control" placeholder="Yorum yapın..." rows="3" required></textarea>
+                    </div>
+                    <button type="submit" class="btn" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; margin-top: 10px; width: 100%; border: none; padding: 10px; border-radius: 8px; font-weight: 600;">
+                        <i class="fa-solid fa-paper-plane"></i> Yorum Gönder
+                    </button>
+                </form>
+            {% endif %}
         </div>
     </div>
 
+    <!-- Right Column (Info Panel) -->
     <div>
-        <div class="card" style="background-color: #f8fafc;">
-            <h3 style="margin-bottom: 20px; font-size: 1.1rem; border-bottom: 1px solid #e2e8f0; padding-bottom: 10px;">Görev Bilgileri</h3>
-            
-            <div style="margin-bottom: 15px;">
-                <span style="color: var(--text-muted); font-size: 0.85rem; display: block; margin-bottom: 5px;">Durum</span>
-                
-                <span class="badge 
-                    {% if task.status.status_name == 'Yapılacak' %}badge-todo
-                    {% elif task.status.status_name == 'Devam Ediyor' %}badge-inprogress
-                    {% elif task.status.status_name == 'Sorun Var' %}badge-issue
-                    {% elif task.status.status_name == 'Tamamlandı' %}badge-done
-                    {% else %}badge-default{% endif %}" 
-                    style="font-size: 0.9rem; padding: 6px 12px;">
+        <div class="card-modern info-panel">
+            <h3><i class="fa-solid fa-circle-info"></i> Görev Bilgileri</h3>
+
+            <!-- Status -->
+            <div class="info-item">
+                <span class="info-label">Durum</span>
+                <span class="status-badge 
+                    {% if task.status.status_name == 'Yapılacak' %}status-todo
+                    {% elif task.status.status_name == 'Devam Ediyor' %}status-inprogress
+                    {% elif task.status.status_name == 'Sorun Var' %}status-issue
+                    {% elif task.status.status_name == 'Tamamlandı' %}status-done{% endif %}">
                     {{ task.status.status_name }}
                 </span>
             </div>
-            
-            <div style="margin-bottom: 15px;">
-                <span style="color: var(--text-muted); font-size: 0.85rem; display: block; margin-bottom: 5px;">Atanan Çalışan</span>
-                <strong>{{ task.assigned_worker.username|default:"Atanmamış" }}</strong>
+
+            <!-- Assigned Worker -->
+            <div class="info-item">
+                <span class="info-label">Atanan Çalışan</span>
+                {% if task.assigned_worker %}
+                    <div class="assigned-user">
+                        <div class="user-avatar">{{ task.assigned_worker.username|first|upper }}</div>
+                        <div class="info-value">{{ task.assigned_worker.username }}</div>
+                    </div>
+                {% else %}
+                    <div class="info-value" style="color: #94a3b8;">
+                        <i class="fa-solid fa-circle-exclamation"></i> Atanmamış
+                    </div>
+                {% endif %}
             </div>
-            
-            <div style="margin-bottom: 15px;">
-                <span style="color: var(--text-muted); font-size: 0.85rem; display: block; margin-bottom: 5px;">Tarih</span>
-                <span>{{ task.created_at|date:"d M Y" }}</span>
+
+            <!-- Created Date -->
+            <div class="info-item">
+                <span class="info-label">Oluşturulma Tarihi</span>
+                <div class="info-value">
+                    <i class="fa-solid fa-calendar-days"></i> {{ task.created_at|date:"d M Y H:i" }}
+                </div>
+            </div>
+
+            <!-- Project -->
+            <div class="info-item">
+                <span class="info-label">Proje</span>
+                <a href="{% url 'project_detail' task.project.pk %}" style="color: #667eea; text-decoration: none; font-weight: 600;">
+                    <i class="fa-solid fa-folder"></i> {{ task.project.project_name }}
+                </a>
+            </div>
+
+            <!-- Action Buttons -->
+            <div style="margin-top: 30px; display: flex; gap: 10px; flex-direction: column;">
+                {% if request.user == task.assigned_worker or request.user.base_role.role_name == 'Project Manager' or request.user.base_role.role_name == 'Admin' %}
+                    <a href="{% url 'task_update' task.pk %}" class="btn" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; text-decoration: none; padding: 10px; border-radius: 8px; text-align: center; font-weight: 600;">
+                        <i class="fa-solid fa-pen-to-square"></i> Görevi Düzenle
+                    </a>
+                    <form method="post" action="{% url 'task_delete' task.pk %}" onsubmit="return confirm('Bu görevi silmek istediğinize emin misiniz?');">
+                        {% csrf_token %}
+                        <button type="submit" class="btn" style="background: #ef4444; color: white; padding: 10px; border-radius: 8px; text-align: center; font-weight: 600; width: 100%; border: none; cursor: pointer;">
+                            <i class="fa-solid fa-trash"></i> Görevi Sil
+                        </button>
+                    </form>
+                {% endif %}
             </div>
         </div>
     </div>
 </div>
+
 {% endblock %}
