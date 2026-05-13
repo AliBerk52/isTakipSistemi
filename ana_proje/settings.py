@@ -9,9 +9,9 @@ load_dotenv()
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = 'django-insecure-!mf_ssqa4^whr&5819@4-)*_$35un!(&f9q^@ebeyko6w)z!0f'
+SECRET_KEY = os.environ.get('SECRET_KEY')
 
-DEBUG = False
+DEBUG = os.environ.get('DEBUG', 'False') == 'True'
 
 ALLOWED_HOSTS = [
     '.vercel.app',     
@@ -59,10 +59,9 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'ana_proje.wsgi.application'
 
-# ---> İŞTE DÜZELTİLMİŞ VE TEK OLAN VERİTABANI AYARIN <---
 DATABASES = {
     'default': dj_database_url.config(
-        default=os.environ.get('DATABASE_URL', 'mysql://root:qfvMLttpvQhFpkFsfBQlXTHTlrUJlqzh@turntable.proxy.rlwy.net:24805/railway'),
+        default=os.environ.get('DATABASE_URL'),
         conn_max_age=600
     )
 }
@@ -100,5 +99,5 @@ EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_HOST_USER = 'admin.istakippro@gmail.com'
-EMAIL_HOST_PASSWORD = 'kwnt zfcd vswz kyej'
+EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD')
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
