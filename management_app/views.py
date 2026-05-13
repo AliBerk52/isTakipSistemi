@@ -91,6 +91,12 @@ def login_view(request):
             password = form.cleaned_data['password']
             remember_me = request.POST.get('remember_me') == 'on'
 
+            try:
+                real_user = User.objects.get(username__iexact=username)
+                username = real_user.username  # orijinal hali ile authenticate et
+            except User.DoesNotExist:
+                print("Böyle bir kullanıcı yoktur.")
+
             user = authenticate(request, username=username, password=password)
             if user:
                 cache.delete(cache_key)
